@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: backstage-plugin-prow-workspace
-  title: Prow Backstage Plugin
+  name: backstage-plugin-prow
+  title: '@backstage-community/plugin-prow'
   description: A Backstage plugin that shows Prow CI/CD information or catalog entities
 spec:
   lifecycle: experimental

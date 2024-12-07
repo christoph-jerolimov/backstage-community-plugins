@@ -10,8 +10,19 @@
     "main": "dist/index.esm.js",
     "types": "dist/index.d.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/backstage/community-plugins",
+    "directory": "workspaces/prow/plugins/prow"
+  },
   "backstage": {
-    "role": "frontend-plugin"
+    "role": "frontend-plugin",
+    "pluginId": "prow",
+    "pluginPackages": [
+      "@backstage-community/plugin-prow",
+      "@backstage-community/plugin-prow-backend",
+      "@backstage-community/plugin-prow-common"
+    ]
   },
   "sideEffects": false,
   "scripts": {
@@ -49,5 +60,16 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "keywords": [
+    "backstage",
+    "plugin",
+    "prow"
+  ],
+  "homepage": "https://github.com/backstage/community-plugins/tree/main/workspaces/prow/plugins/prow",
+  "bugs": "https://github.com/backstage/community-plugins/issues",
+  "maintainers": [
+    "@christoph-jerolimov"
+  ],
+  "author": "Christoph Jerolimov"
 }
