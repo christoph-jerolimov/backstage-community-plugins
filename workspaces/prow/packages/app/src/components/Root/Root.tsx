@@ -94,6 +94,7 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
         <SidebarDivider />
         <SidebarScrollWrapper>
           {/* Items in this group will be scrollable if they run out of space */}
+          <SidebarItem icon={CreateComponentIcon} to="prow" text="Prow" />
         </SidebarScrollWrapper>
       </SidebarGroup>
       <SidebarSpace />
