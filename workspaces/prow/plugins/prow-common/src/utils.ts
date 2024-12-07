@@ -13,4 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { ExampleComponent } from './ExampleComponent';
+import { type Entity } from '@backstage/catalog-model';
+
+import { ProwAnnotationPrefix } from './annotations';
+
+/**
+ * Function that returns true if the given entity contains at least one
+ * prow related annotation.
+ *
+ * @public
+ */
+export const isProwAvailable = (entity: Entity): boolean => {
+  const annotations = entity.metadata.annotations ?? {};
+  return Object.keys(annotations).some(a => a.startsWith(ProwAnnotationPrefix));
+};

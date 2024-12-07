@@ -13,4 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { ExampleFetchComponent } from './ExampleFetchComponent';
+
+export const ProwAnnotationPrefix = 'prow.k8s.io/';
+
+/**
+ * @public
+ */
+export enum ProwAnnotation {
+  REPOSITORY_NAME = 'prow.k8s.io/repository',
+  JOB_NAME = 'prow.k8s.io/job',
+}

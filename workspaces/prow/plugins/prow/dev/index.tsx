@@ -15,13 +15,49 @@
  */
 import React from 'react';
 import { createDevApp } from '@backstage/dev-utils';
-import { prowPlugin, ProwPage } from '../src/plugin';
+import { Page, Header, TabbedLayout } from '@backstage/core-components';
+import { EntityProvider } from '@backstage/plugin-catalog-react';
+
+import { prowPlugin, EntityProwContent } from '../src/plugin';
+import { ProwAnnotation } from '@backstage-community/plugin-prow-common';
+
+const mockEntity = {
+  apiVersion: 'backstage.io/v1alpha1',
+  kind: 'Component',
+  metadata: {
+    name: 'kubernetes',
+    annotations: {
+      [ProwAnnotation.REPOSITORY_NAME]: 'kubernetes',
+    },
+  },
+  spec: {
+    type: 'website',
+    lifecycle: 'production',
+    owner: 'guests',
+  },
+};
 
 createDevApp()
   .registerPlugin(prowPlugin)
   .addPage({
-    element: <ProwPage />,
-    title: 'Root Page',
-    path: '/prow',
+    element: (
+      <EntityProvider entity={mockEntity}>
+        <Page themeId={mockEntity.kind.toLocaleLowerCase('en-US')}>
+          <Header
+            type={`${mockEntity.kind.toLocaleLowerCase('en-US')} — ${
+              mockEntity.spec.type
+            }`}
+            title={mockEntity.metadata.name}
+          />
+          <TabbedLayout>
+            <TabbedLayout.Route path="/" title="CI/CD">
+              <EntityProwContent />
+            </TabbedLayout.Route>
+          </TabbedLayout>
+        </Page>
+      </EntityProvider>
+    ),
+    title: 'CI/CD content',
+    path: '/',
   })
   .render();

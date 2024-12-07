@@ -1,0 +1,21 @@
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-system
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: kubernetes
+spec:
+  owner: guests
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: kubernetes
+  annotations:
+    prow.k8s.io/repository: kubernetes
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: kubernetes

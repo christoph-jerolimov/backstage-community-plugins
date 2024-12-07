@@ -6,11 +6,14 @@
 /// <reference types="react" />
 
 import { BackstagePlugin } from '@backstage/core-plugin-api';
+import { isProwAvailable } from '@backstage-community/plugin-prow-common';
 import { JSX as JSX_2 } from 'react';
 import { RouteRef } from '@backstage/core-plugin-api';
 
-// @public (undocumented)
-export const ProwPage: () => JSX_2.Element;
+// @public
+export const EntityProwContent: () => JSX_2.Element;
+
+export { isProwAvailable };
 
 // @public (undocumented)
 export const prowPlugin: BackstagePlugin<

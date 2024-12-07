@@ -13,4 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-console.log('Hello from ${{ values.name }}!');
+
+/**
+ * Prow build state
+ * @public
+ */
+export enum ProwBuildState {
+  PENDING = 'Pending',
+  RUNNING = 'Running',
+  SUCCEEDED = 'Succeeded',
+  FAILED = 'Failed',
+  ABORTED = 'Aborted',
+  ERROR = 'Error',
+}
+
+/**
+ * Prow build
+ *
+ * @public
+ */
+export interface ProwBuild {
+  id: string;
+  state: string;
+  repository?: string;
+  job?: string;
+  scheduled?: string;
+  // TODO
+  duration?: string;
+}

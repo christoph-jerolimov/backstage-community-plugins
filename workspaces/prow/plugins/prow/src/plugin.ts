@@ -15,7 +15,7 @@
  */
 import {
   createPlugin,
-  createRoutableExtension,
+  createComponentExtension,
 } from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
@@ -27,11 +27,17 @@ export const prowPlugin = createPlugin({
   },
 });
 
-export const ProwPage = prowPlugin.provide(
-  createRoutableExtension({
-    name: 'ProwPage',
-    component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
-    mountPoint: rootRouteRef,
+/**
+ * Content element for the catalog `EntityPage` > CI/CD tab.
+ *
+ * @public
+ */
+export const EntityProwContent = prowPlugin.provide(
+  createComponentExtension({
+    name: 'EntityProwContent',
+    component: {
+      lazy: () =>
+        import('./components/EntityProwContent').then(m => m.EntityProwContent),
+    },
   }),
 );

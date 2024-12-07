@@ -2783,6 +2783,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-prow-common@workspace:plugins/prow-common"
   dependencies:
+    "@backstage/catalog-model": ^1.7.1
     "@backstage/cli": ^0.29.2
   languageName: unknown
   linkType: soft
@@ -2797,6 +2798,7 @@ __metadata:
     "@backstage/core-components": ^0.16.1
     "@backstage/core-plugin-api": ^1.10.1
     "@backstage/dev-utils": ^1.1.4
+    "@backstage/plugin-catalog-react": ^1.14.2
     "@backstage/test-utils": ^1.7.2
     "@backstage/theme": ^0.6.2
     "@material-ui/core": ^4.9.13
