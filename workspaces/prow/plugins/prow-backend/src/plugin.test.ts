@@ -14,54 +14,18 @@
  * limitations under the License.
  */
 import {
-  mockCredentials,
+  // mockCredentials,
   startTestBackend,
 } from '@backstage/backend-test-utils';
-import { prowPlugin } from './plugin';
 import request from 'supertest';
+
 import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
-// TEMPLATE NOTE:
-// Plugin tests are integration tests for your plugin, ensuring that all pieces
-// work together end-to-end. You can still mock injected backend services
-// however, just like anyone who installs your plugin might replace the
-// services with their own implementations.
+import { ProwBuild } from '@backstage-community/plugin-prow-common';
+import { prowPlugin } from './plugin';
+
 describe('plugin', () => {
-  it('should create and read TODO items', async () => {
-    const { server } = await startTestBackend({
-      features: [prowPlugin],
-    });
-
-    await request(server).get('/api/prow/todos').expect(200, {
-      items: [],
-    });
-
-    const createRes = await request(server)
-      .post('/api/prow/todos')
-      .send({ title: 'My Todo' });
-
-    expect(createRes.status).toBe(201);
-    expect(createRes.body).toEqual({
-      id: expect.any(String),
-      title: 'My Todo',
-      createdBy: mockCredentials.user().principal.userEntityRef,
-      createdAt: expect.any(String),
-    });
-
-    const createdTodoItem = createRes.body;
-
-    await request(server)
-      .get('/api/prow/todos')
-      .expect(200, {
-        items: [createdTodoItem],
-      });
-
-    await request(server)
-      .get(`/api/prow/todos/${createdTodoItem.id}`)
-      .expect(200, createdTodoItem);
-  });
-
-  it('should create TODO item with catalog information', async () => {
+  it('should return builds', async () => {
     const { server } = await startTestBackend({
       features: [
         prowPlugin,
@@ -85,16 +49,21 @@ describe('plugin', () => {
       ],
     });
 
-    const createRes = await request(server)
-      .post('/api/prow/todos')
-      .send({ title: 'My Todo', entityRef: 'component:default/my-component' });
+    const entityRef = 'component:default/my-component';
+    const response = await request(server).get(
+      `/api/prow/${encodeURIComponent(entityRef)}/builds`,
+    );
 
-    expect(createRes.status).toBe(201);
-    expect(createRes.body).toEqual({
+    const expectedBuilds: ProwBuild[] = Array.from({ length: 10 }, (_, i) => ({
       id: expect.any(String),
-      title: '[My Component] My Todo',
-      createdBy: mockCredentials.user().principal.userEntityRef,
-      createdAt: expect.any(String),
-    });
+      state: expect.any(String),
+      repository: '-',
+      job: '-',
+      scheduled: '2024-....',
+      duration: '12 minutes',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(expectedBuilds);
   });
 });

@@ -16,15 +16,33 @@
 import {
   createPlugin,
   createComponentExtension,
+  createApiFactory,
+  discoveryApiRef,
+  fetchApiRef,
 } from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
+import { ProwBackendApiRef, ProwBackendClient } from './api';
 
 export const prowPlugin = createPlugin({
   id: 'prow',
   routes: {
     root: rootRouteRef,
   },
+  apis: [
+    createApiFactory({
+      api: ProwBackendApiRef,
+      deps: {
+        discoveryApi: discoveryApiRef,
+        fetchApi: fetchApiRef,
+      },
+      factory: ({ discoveryApi, fetchApi }) =>
+        new ProwBackendClient({
+          discoveryApi,
+          fetchApi,
+        }),
+    }),
+  ],
 });
 
 /**

@@ -14,47 +14,66 @@
  * limitations under the License.
  */
 import React from 'react';
-import { Table, TableColumn } from '@backstage/core-components';
+import { ErrorPanel, Table, TableColumn } from '@backstage/core-components';
+import { useApi } from '@backstage/core-plugin-api';
+import { useEntity } from '@backstage/plugin-catalog-react';
+import { stringifyEntityRef } from '@backstage/catalog-model';
+
+import { ProwBuild } from '@backstage-community/plugin-prow-common';
+
+import Box from '@material-ui/core/Box';
 
 import {
-  ProwBuild,
-  ProwBuildState,
-} from '@backstage-community/plugin-prow-common';
+  useQuery,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 
+import { ProwBackendApiRef } from '../api';
 import { Status } from './Status';
-
-const createBuildState = (i: number) => {
-  if (i < 2) return ProwBuildState.PENDING;
-  if (i === 5) return ProwBuildState.FAILED;
-  return ProwBuildState.SUCCEEDED;
-};
-
-const builds: ProwBuild[] = Array.from({ length: 10 }, (_, i) => ({
-  id: (i + 3143241324).toString(),
-  state: createBuildState(i),
-  repository: 'mock data',
-  job: 'mock data',
-  scheduled: '2024-....',
-  duration: '12 minutes',
-}));
 
 const columns: TableColumn<ProwBuild>[] = [
   { title: 'ID', field: 'id' },
   { title: 'State', field: 'state', render: build => <Status build={build} /> },
   { title: 'Repository', field: 'repository' },
   { title: 'Job', field: 'job' },
-  { title: 'State', field: 'state' },
   { title: 'Scheduled', field: 'scheduled' },
   { title: 'Duration', field: 'duration' },
 ];
 
-export const EntityProwContent = () => {
+const Content = () => {
+  const backendApi = useApi(ProwBackendApiRef);
+  const { entity } = useEntity();
+  const entityRef = stringifyEntityRef(entity);
+  const query = useQuery({
+    queryKey: ['builds'],
+    queryFn: () => backendApi.getBuilds(entityRef),
+  });
+
+  const emptyContent = query.error ? (
+    <Box padding={1}>
+      <ErrorPanel error={query.error} />
+    </Box>
+  ) : null;
+
   return (
     <Table
       title="Prow builds"
       options={{ search: false, paging: false }}
       columns={columns}
-      data={builds}
+      isLoading={query.isLoading}
+      data={query.data ?? []}
+      emptyContent={emptyContent}
     />
+  );
+};
+
+const queryClient = new QueryClient();
+
+export const EntityProwContent = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Content />
+    </QueryClientProvider>
   );
 };

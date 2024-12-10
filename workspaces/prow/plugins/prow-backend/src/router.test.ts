@@ -21,61 +21,62 @@ import {
 import express from 'express';
 import request from 'supertest';
 
-import { createRouter } from './router';
-import { TodoListService } from './services/TodoListService/types';
+import {
+  ProwBuild,
+  ProwBuildState,
+} from '@backstage-community/plugin-prow-common';
 
-const mockTodoItem = {
-  title: 'Do the thing',
-  id: '123',
-  createdBy: mockCredentials.user().principal.userEntityRef,
-  createdAt: new Date().toISOString(),
+import { createRouter } from './router';
+import { ProwService } from './services/ProwService';
+
+const createBuildState = (i: number) => {
+  if (i < 2) return ProwBuildState.PENDING;
+  if (i === 5) return ProwBuildState.FAILED;
+  return ProwBuildState.SUCCEEDED;
 };
 
-// TEMPLATE NOTE:
+const mockBuilds: ProwBuild[] = Array.from({ length: 10 }, (_, i) => ({
+  id: (i + 3143241324).toString(),
+  state: createBuildState(i),
+  repository: '-',
+  job: '-',
+  scheduled: '2024-....',
+  duration: '12 minutes',
+}));
+
 // Testing the router directly allows you to write a unit test that mocks the provided options.
 describe('createRouter', () => {
   let app: express.Express;
-  let todoListService: jest.Mocked<TodoListService>;
+  let prowService: jest.Mocked<ProwService>;
 
   beforeEach(async () => {
-    todoListService = {
-      createTodo: jest.fn(),
-      listTodos: jest.fn(),
-      getTodo: jest.fn(),
+    prowService = {
+      getBuilds: jest.fn(),
     };
     const router = await createRouter({
       httpAuth: mockServices.httpAuth(),
-      todoListService,
+      prowService,
     });
     app = express();
     app.use(router);
     app.use(mockErrorHandler());
   });
 
-  it('should create a TODO', async () => {
-    todoListService.createTodo.mockResolvedValue(mockTodoItem);
+  it('should return mocked data', async () => {
+    prowService.getBuilds.mockResolvedValue(mockBuilds);
 
-    const response = await request(app).post('/todos').send({
-      title: 'Do the thing',
-    });
+    const response = await request(app).get('/my-entity/builds');
 
-    expect(response.status).toBe(201);
-    expect(response.body).toEqual(mockTodoItem);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockBuilds);
   });
 
-  it('should not allow unauthenticated requests to create a TODO', async () => {
-    todoListService.createTodo.mockResolvedValue(mockTodoItem);
+  it('should not allow unauthenticated requests', async () => {
+    prowService.getBuilds.mockResolvedValue(mockBuilds);
 
-    // TEMPLATE NOTE:
-    // The HttpAuth mock service considers all requests to be authenticated as a
-    // mock user by default. In order to test other cases we need to explicitly
-    // pass an authorization header with mock credentials.
     const response = await request(app)
-      .post('/todos')
-      .set('Authorization', mockCredentials.none.header())
-      .send({
-        title: 'Do the thing',
-      });
+      .get('/anohter-entity/builds')
+      .set('Authorization', mockCredentials.none.header());
 
     expect(response.status).toBe(401);
   });

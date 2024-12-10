@@ -13,4 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { createTodoListService } from './createTodoListService';
+import { ProwBuild } from '@backstage-community/plugin-prow-common';
+
+/**
+ * @public
+ */
+export interface ProwBackendApi {
+  getBuilds(entityRef: string): Promise<ProwBuild[]>;
+}

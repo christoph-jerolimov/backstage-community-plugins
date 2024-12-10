@@ -19,7 +19,7 @@ import {
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
-import { createTodoListService } from './services/TodoListService';
+import { ProwServiceMock } from './services/ProwServiceMock';
 
 /**
  * prowPlugin backend plugin
@@ -33,21 +33,23 @@ export const prowPlugin = createBackendPlugin({
       deps: {
         logger: coreServices.logger,
         auth: coreServices.auth,
+        config: coreServices.rootConfig,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         catalog: catalogServiceRef,
       },
-      async init({ logger, auth, httpAuth, httpRouter, catalog }) {
-        const todoListService = await createTodoListService({
+      async init({ logger, auth, config, httpAuth, httpRouter, catalog }) {
+        const prowService = new ProwServiceMock({
           logger,
           auth,
+          config,
           catalog,
         });
 
         httpRouter.use(
           await createRouter({
             httpAuth,
-            todoListService,
+            prowService,
           }),
         );
       },

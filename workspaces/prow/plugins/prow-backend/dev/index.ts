@@ -17,7 +17,6 @@ import { createBackend } from '@backstage/backend-defaults';
 import { mockServices } from '@backstage/backend-test-utils';
 import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
-// TEMPLATE NOTE:
 // This is the development setup for your plugin that wires up a
 // minimal backend that can use both real and mocked plugins and services.
 //
@@ -40,7 +39,6 @@ import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
 const backend = createBackend();
 
-// TEMPLATE NOTE:
 // Mocking the auth and httpAuth service allows you to call your plugin API without
 // having to authenticate.
 //
@@ -50,7 +48,6 @@ const backend = createBackend();
 backend.add(mockServices.auth.factory());
 backend.add(mockServices.httpAuth.factory());
 
-// TEMPLATE NOTE:
 // Rather than using a real catalog you can use a mock with a fixed set of entities.
 backend.add(
   catalogServiceMock.factory({

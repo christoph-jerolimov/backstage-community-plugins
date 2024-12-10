@@ -13,30 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  BackstageCredentials,
-  BackstageUserPrincipal,
-} from '@backstage/backend-plugin-api';
+import { createApiRef } from '@backstage/core-plugin-api';
 
-export interface TodoItem {
-  title: string;
-  id: string;
-  createdBy: string;
-  createdAt: string;
-}
+import { ProwBackendApi } from './ProwBackendApi';
 
-export interface TodoListService {
-  createTodo(
-    input: {
-      title: string;
-      entityRef?: string;
-    },
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
-  ): Promise<TodoItem>;
+export * from './ProwBackendClient';
 
-  listTodos(): Promise<{ items: TodoItem[] }>;
-
-  getTodo(request: { id: string }): Promise<TodoItem>;
-}
+export const ProwBackendApiRef = createApiRef<ProwBackendApi>({
+  id: 'plugin.prow.backend-api-ref',
+});
