@@ -51,6 +51,7 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
+import { UserProfilePage } from '@backstage-community/plugin-user-profiles';
 
 const app = createApp({
   apis,
@@ -86,6 +87,7 @@ const routes = (
     >
       {entityPage}
     </Route>
+    <Route path="/catalog-graph" element={<CatalogGraphPage />} />
     <Route path="/docs" element={<TechDocsIndexPage />} />
     <Route
       path="/docs/:namespace/:kind/:name/*"
@@ -108,8 +110,8 @@ const routes = (
     <Route path="/search" element={<SearchPage />}>
       {searchPage}
     </Route>
+    <Route path="/profile" element={<UserProfilePage />} />
     <Route path="/settings" element={<UserSettingsPage />} />
-    <Route path="/catalog-graph" element={<CatalogGraphPage />} />
   </FlatRoutes>
 );
 
