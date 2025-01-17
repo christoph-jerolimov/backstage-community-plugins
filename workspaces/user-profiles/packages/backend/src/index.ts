@@ -60,4 +60,6 @@ backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 // kubernetes
 backend.add(import('@backstage/plugin-kubernetes-backend'));
 
+backend.add(import('@backstage-community/plugin-user-profiles-backend'));
+
 backend.start();
