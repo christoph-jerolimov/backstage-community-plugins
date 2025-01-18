@@ -13,4 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { createTodoListService } from './createTodoListService';
+import {
+  BackstageCredentials,
+  BackstageUserPrincipal,
+} from '@backstage/backend-plugin-api';
+
+export interface UserProfile {
+  description: string;
+}
+
+export interface UserProfileService {
+  updateUserProfile(
+    entityRef: string,
+    userProfile: UserProfile,
+    options: {
+      credentials: BackstageCredentials<BackstageUserPrincipal>;
+    },
+  ): Promise<UserProfile>;
+
+  getUserProfile(
+    entityRef: string,
+    options: {
+      credentials: BackstageCredentials<BackstageUserPrincipal>;
+    },
+  ): Promise<UserProfile>;
+}

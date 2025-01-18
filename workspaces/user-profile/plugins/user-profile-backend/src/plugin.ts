@@ -19,7 +19,8 @@ import {
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
-import { createTodoListService } from './services/TodoListService';
+import { UserProfileService } from './services/UserProfileService';
+import { UserProfileServiceImpl } from './services/UserProfileServiceImpl';
 
 /**
  * userProfilePlugin backend plugin
@@ -33,21 +34,24 @@ export const userProfilePlugin = createBackendPlugin({
       deps: {
         logger: coreServices.logger,
         auth: coreServices.auth,
+        config: coreServices.rootConfig,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         catalog: catalogServiceRef,
       },
-      async init({ logger, auth, httpAuth, httpRouter, catalog }) {
-        const todoListService = await createTodoListService({
-          logger,
-          auth,
-          catalog,
-        });
+      async init({ logger, auth, config, httpAuth, httpRouter, catalog }) {
+        const userProfileService: UserProfileService =
+          new UserProfileServiceImpl({
+            logger,
+            auth,
+            config,
+            catalog,
+          });
 
         httpRouter.use(
           await createRouter({
             httpAuth,
-            todoListService,
+            userProfileService,
           }),
         );
       },
