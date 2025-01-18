@@ -2755,6 +2755,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@backstage-community/plugin-catalog-backend-module-user-profile@workspace:^, @backstage-community/plugin-catalog-backend-module-user-profile@workspace:plugins/catalog-backend-module-user-profile":
+  version: 0.0.0-use.local
+  resolution: "@backstage-community/plugin-catalog-backend-module-user-profile@workspace:plugins/catalog-backend-module-user-profile"
+  dependencies:
+    "@backstage/backend-plugin-api": ^1.1.1
+    "@backstage/backend-test-utils": ^1.2.1
+    "@backstage/cli": ^0.29.5
+  languageName: unknown
+  linkType: soft
+
 "@backstage-community/plugin-user-profile-backend@workspace:^, @backstage-community/plugin-user-profile-backend@workspace:plugins/user-profile-backend":
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-user-profile-backend@workspace:plugins/user-profile-backend"
@@ -15225,6 +15235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "backend@workspace:packages/backend"
   dependencies:
+    "@backstage-community/plugin-catalog-backend-module-user-profile": "workspace:^"
     "@backstage-community/plugin-user-profile-backend": "workspace:^"
     "@backstage/backend-defaults": ^0.7.0
     "@backstage/cli": ^0.29.5
