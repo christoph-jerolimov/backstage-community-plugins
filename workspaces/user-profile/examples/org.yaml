@@ -3,14 +3,21 @@
 apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
+  namespace: development
   name: guest
+  title: A guest (title)
+  description: '# A guest that should be only used in development!'
 spec:
+  profile:
+    email: guest@example.com
+    displayName: A guest (displayName)
   memberOf: [guests]
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
 apiVersion: backstage.io/v1alpha1
 kind: Group
 metadata:
+  namespace: development
   name: guests
 spec:
   type: team

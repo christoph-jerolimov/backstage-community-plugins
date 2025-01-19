@@ -54,7 +54,10 @@ export const MarkdownWidget = (props: WidgetProps) => {
           minRows={5}
         />
       ) : null}
-      {tab === 'preview' ? <MarkdownContent content={props.value} /> : null}
+
+      {tab === 'preview' ? (
+        <MarkdownContent dialect="gfm" content={props.value} />
+      ) : null}
     </div>
   );
 };

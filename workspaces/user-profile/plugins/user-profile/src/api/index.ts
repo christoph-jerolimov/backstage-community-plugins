@@ -13,5 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './plugin';
-export * from './utils';
+import { createApiRef } from '@backstage/core-plugin-api';
+
+import { UserProfileBackendApi } from './UserProfileBackendApi';
+
+export * from './UserProfileBackendClient';
+
+export const userProfileBackendApiRef = createApiRef<UserProfileBackendApi>({
+  id: 'plugin.user-profile.backend-api-ref',
+});

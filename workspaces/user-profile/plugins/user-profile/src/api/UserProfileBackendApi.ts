@@ -13,5 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './plugin';
-export * from './utils';
+
+/**
+ * @public
+ */
+export interface UserProfileBackendApi {
+  getUserProfile(): Promise<any>;
+  updateUserProfile(userProfile: any): Promise<any>;
+}

@@ -15,10 +15,14 @@
  */
 import React, { FormEvent } from 'react';
 
-import { Progress } from '@backstage/core-components';
+import { ErrorPanel, Progress } from '@backstage/core-components';
+import { useApi } from '@backstage/core-plugin-api';
 
 import { extractSchemaFromStep } from '@backstage/plugin-scaffolder-react/alpha';
 
+import Box from '@material-ui/core/Box';
+
+import { IChangeEvent } from '@rjsf/core';
 import Form from '@rjsf/material-ui';
 import {
   RegistryWidgetsType,
@@ -28,11 +32,11 @@ import {
 } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 
+import { userProfileBackendApiRef } from '../api';
 import { ObjectFieldTemplate } from '../templates/ObjectFieldTemplate';
 import { MarkdownWidget } from '../widgets/MarkdownWidget';
 
 import userProfileFormSchema from './userProfileFormSchema.json';
-import { IChangeEvent } from '@rjsf/core';
 
 const templates: Partial<TemplatesType> = {
   ObjectFieldTemplate,
@@ -42,40 +46,63 @@ const widgets: RegistryWidgetsType = {
   markdown: MarkdownWidget,
 };
 
+interface State {
+  loading: boolean;
+  data?: any;
+  error?: Error;
+}
+
 export const UserProfileForm = () => {
-  const [loading, setLoading] = React.useState(true);
+  const api = useApi(userProfileBackendApiRef);
+  const [state, setState] = React.useState<State>({ loading: true });
 
   const { schema, uiSchema } = React.useMemo(
     () => extractSchemaFromStep(userProfileFormSchema),
     [],
   );
 
+  React.useEffect(() => {
+    api.getUserProfile().then(
+      (data: any) => {
+        setState({ loading: false, data });
+      },
+      (error: Error) => {
+        setState({ loading: false, error });
+      },
+    );
+  }, [api]);
+
   // eslint-disable-next-line no-console
   console.log('DEBUG UserProfileForm schema', schema);
   // eslint-disable-next-line no-console
   console.log('DEBUG UserProfileForm uiSchema', uiSchema);
 
-  React.useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
-
   const onChange = (data: IChangeEvent<any, RJSFSchema, any>, id?: string) => {
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm change!', data, id);
   };
+
   const onSubmit = (
     data: IChangeEvent<any, RJSFSchema, any>,
     event: FormEvent<any>,
   ) => {
+    setState({ loading: true });
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm submit!', data, event);
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm form errors', data.errors);
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm form data', data.formData);
+    api.updateUserProfile(data.formData).then(
+      (updatedData: any) => {
+        setState({ loading: false, data: updatedData });
+      },
+      (error: Error) => {
+        setState({ loading: false, error });
+      },
+    );
   };
+
   const onError = (errors: RJSFValidationError[]) => {
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm error!', errors);
@@ -83,9 +110,14 @@ export const UserProfileForm = () => {
 
   return (
     <>
-      {loading ? <Progress /> : null}
+      {state.loading ? <Progress /> : null}
+      {state.error ? (
+        <div style={{ width: '100%', paddingBottom: 16 }}>
+          <ErrorPanel error={state.error} />
+        </div>
+      ) : null}
       <Form
-        disabled={loading}
+        disabled={state.loading || !!state.error}
         schema={schema}
         uiSchema={uiSchema}
         validator={validator}

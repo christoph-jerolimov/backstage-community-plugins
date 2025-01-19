@@ -13,5 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './plugin';
-export * from './utils';
+import { Entity } from '@backstage/catalog-model';
+
+export const isUserProfileBioAvailable = (entity: Entity): boolean => {
+  const bio = entity.metadata.description;
+  return Boolean(bio);
+};

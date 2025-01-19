@@ -74,6 +74,12 @@ import {
   isKubernetesAvailable,
 } from '@backstage/plugin-kubernetes';
 
+import {
+  isUserProfileBioAvailable,
+  UserProfileForm,
+  UserProfileBioCard,
+} from '@backstage-community/plugin-user-profile';
+
 const techdocsContent = (
   <EntityTechdocsContent>
     <TechDocsAddons>
@@ -316,11 +322,21 @@ const userPage = (
         {entityWarningContent}
         <Grid item xs={12} md={6}>
           <EntityUserProfileCard variant="gridItem" />
+
+          <EntitySwitch>
+            <EntitySwitch.Case if={isUserProfileBioAvailable}>
+              <UserProfileBioCard />
+            </EntitySwitch.Case>
+          </EntitySwitch>
         </Grid>
         <Grid item xs={12} md={6}>
           <EntityOwnershipCard variant="gridItem" />
         </Grid>
       </Grid>
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/profile" title="User Profile">
+      <UserProfileForm />
     </EntityLayout.Route>
   </EntityLayout>
 );

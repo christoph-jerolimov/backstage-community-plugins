@@ -14,14 +14,33 @@
  * limitations under the License.
  */
 import {
+  createApiFactory,
+  createComponentExtension,
   createPlugin,
   createRoutableExtension,
+  discoveryApiRef,
+  fetchApiRef,
 } from '@backstage/core-plugin-api';
 
+import { userProfileBackendApiRef, UserProfileBackendClient } from './api';
 import { rootRouteRef } from './routes';
 
 export const userProfilePlugin = createPlugin({
   id: 'user-profile',
+  apis: [
+    createApiFactory({
+      api: userProfileBackendApiRef,
+      deps: {
+        discoveryApi: discoveryApiRef,
+        fetchApi: fetchApiRef,
+      },
+      factory: ({ discoveryApi, fetchApi }) =>
+        new UserProfileBackendClient({
+          discoveryApi,
+          fetchApi,
+        }),
+    }),
+  ],
   routes: {
     root: rootRouteRef,
   },
@@ -33,5 +52,27 @@ export const UserProfilePage = userProfilePlugin.provide(
     component: () =>
       import('./components/UserProfilePage').then(m => m.UserProfilePage),
     mountPoint: rootRouteRef,
+  }),
+);
+
+export const UserProfileForm = userProfilePlugin.provide(
+  createComponentExtension({
+    name: 'UserProfileForm',
+    component: {
+      lazy: () =>
+        import('./components/UserProfileForm').then(m => m.UserProfileForm),
+    },
+  }),
+);
+
+export const UserProfileBioCard = userProfilePlugin.provide(
+  createComponentExtension({
+    name: 'UserProfileBioCard',
+    component: {
+      lazy: () =>
+        import('./components/UserProfileBioCard').then(
+          m => m.UserProfileBioCard,
+        ),
+    },
   }),
 );

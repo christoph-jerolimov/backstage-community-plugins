@@ -13,5 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './plugin';
-export * from './utils';
+import React from 'react';
+
+import { InfoCard, MarkdownContent } from '@backstage/core-components';
+
+import { useEntity } from '@backstage/plugin-catalog-react';
+
+export const UserProfileBioCard = () => {
+  const { entity } = useEntity();
+
+  const bio = entity.metadata.description!;
+
+  return (
+    <InfoCard title="Bio">
+      <MarkdownContent dialect="gfm" content={bio} />
+    </InfoCard>
+  );
+};
