@@ -15,7 +15,7 @@
  */
 import React from 'react';
 
-import { Page, Header, Content, InfoCard } from '@backstage/core-components';
+import { Page, Header, Content } from '@backstage/core-components';
 
 import Button from '@material-ui/core/Button';
 
@@ -28,10 +28,8 @@ export const UserProfilePage = () => {
     <Page themeId="user-profile">
       <Header title="User profile" />
       <Content>
-        <InfoCard>
-          <Button onClick={rerender}>Rerender</Button>
-          <UserProfileForm />
-        </InfoCard>
+        <Button onClick={rerender}>Rerender</Button>
+        <UserProfileForm />
       </Content>
     </Page>
   );

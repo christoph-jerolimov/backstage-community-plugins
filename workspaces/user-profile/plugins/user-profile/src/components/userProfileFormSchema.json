@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "title": "User profile",
+  "properties": {
+    "about": {
+      "type": "object",
+      "title": "About",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Display name"
+        },
+        "timezone": {
+          "type": "string",
+          "title": "Timezone"
+        },
+        "workinghours": {
+          "type": "string",
+          "title": "Working hours"
+        }
+      },
+      "ui:template": "infocard"
+    },
+    "bio": {
+      "type": "object",
+      "title": "Bio",
+      "properties": {
+        "description": {
+          "type": "string",
+          "title": "",
+          "ui:widget": "markdown"
+        }
+      },
+      "ui:template": "infocard"
+    },
+    "tags": {
+      "type": "array",
+      "title": "Tags",
+      "items": {
+        "type": "string",
+        "title": ""
+      }
+    },
+    "links": {
+      "type": "array",
+      "title": "Links",
+      "items": {
+        "type": "object",
+        "title": "",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "URL",
+            "description": "A url in a standard uri format (e.g. https://example.com/some/page)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "A user friendly display name for the link."
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon",
+            "description": "A key representing a visual icon to be displayed in the UI."
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "An optional value to categorize links into specific groups."
+          }
+        },
+        "required": ["url"]
+      }
+    }
+  },
+  "ui:template": "grid",
+  "ui:submitButtonOptions": {
+    "submitText": "Save"
+  }
+}

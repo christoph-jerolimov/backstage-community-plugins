@@ -2796,6 +2796,7 @@ __metadata:
     "@backstage/core-components": ^0.16.3
     "@backstage/core-plugin-api": ^1.10.3
     "@backstage/dev-utils": ^1.1.6
+    "@backstage/plugin-scaffolder-react": ^1.14.3
     "@backstage/test-utils": ^1.7.4
     "@backstage/theme": ^0.6.3
     "@material-ui/core": ^4.9.13

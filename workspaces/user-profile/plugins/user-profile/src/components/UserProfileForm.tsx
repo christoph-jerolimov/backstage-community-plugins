@@ -13,72 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { FormEvent } from 'react';
 
 import { Progress } from '@backstage/core-components';
 
+import { extractSchemaFromStep } from '@backstage/plugin-scaffolder-react/alpha';
+
 import Form from '@rjsf/material-ui';
-import { RegistryWidgetsType, RJSFSchema, UiSchema } from '@rjsf/utils';
+import {
+  RegistryWidgetsType,
+  RJSFSchema,
+  RJSFValidationError,
+  TemplatesType,
+} from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
-import { MarkdownWidget } from './MarkdownWidget';
 
-const schema: RJSFSchema = {
-  type: 'object',
-  title: 'User profile',
-  properties: {
-    title: {
-      type: 'string',
-      title: 'Display name',
-    },
-    description: {
-      type: 'string',
-      title: 'Bio',
-    },
-    timezone: {
-      type: 'string',
-      title: 'Timezone',
-    },
-    workinghours: {
-      type: 'string',
-      title: 'Working hours',
-    },
-    tags: {
-      type: 'array',
-      title: 'Tags',
-      items: {
-        type: 'string',
-        title: '',
-      },
-    },
-    links: {
-      type: 'array',
-      title: 'Links',
-      items: {
-        type: 'object',
-        title: '',
-        properties: {
-          url: {
-            type: 'string',
-          },
-          title: {
-            type: 'string',
-          },
-          icon: {
-            type: 'string',
-          },
-          s: {
-            type: 'string',
-          },
-        },
-      },
-    },
-  },
-};
+import { ObjectFieldTemplate } from '../templates/ObjectFieldTemplate';
+import { MarkdownWidget } from '../widgets/MarkdownWidget';
 
-const uiSchema: UiSchema = {
-  description: {
-    'ui:widget': 'markdown',
-  },
+import userProfileFormSchema from './userProfileFormSchema.json';
+import { IChangeEvent } from '@rjsf/core';
+
+const templates: Partial<TemplatesType> = {
+  ObjectFieldTemplate,
 };
 
 const widgets: RegistryWidgetsType = {
@@ -88,23 +45,40 @@ const widgets: RegistryWidgetsType = {
 export const UserProfileForm = () => {
   const [loading, setLoading] = React.useState(true);
 
+  const { schema, uiSchema } = React.useMemo(
+    () => extractSchemaFromStep(userProfileFormSchema),
+    [],
+  );
+
+  // eslint-disable-next-line no-console
+  console.log('DEBUG UserProfileForm schema', schema);
+  // eslint-disable-next-line no-console
+  console.log('DEBUG UserProfileForm uiSchema', uiSchema);
+
   React.useEffect(() => {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
   }, []);
 
-  const onChange = () => {
+  const onChange = (data: IChangeEvent<any, RJSFSchema, any>, id?: string) => {
     // eslint-disable-next-line no-console
-    console.log('change!');
+    console.log('DEBUG UserProfileForm change!', data, id);
   };
-  const onSubmit = () => {
+  const onSubmit = (
+    data: IChangeEvent<any, RJSFSchema, any>,
+    event: FormEvent<any>,
+  ) => {
     // eslint-disable-next-line no-console
-    console.log('submit!');
+    console.log('DEBUG UserProfileForm submit!', data, event);
+    // eslint-disable-next-line no-console
+    console.log('DEBUG UserProfileForm form errors', data.errors);
+    // eslint-disable-next-line no-console
+    console.log('DEBUG UserProfileForm form data', data.formData);
   };
-  const onError = () => {
+  const onError = (errors: RJSFValidationError[]) => {
     // eslint-disable-next-line no-console
-    console.log('error!');
+    console.log('DEBUG UserProfileForm error!', errors);
   };
 
   return (
@@ -115,6 +89,7 @@ export const UserProfileForm = () => {
         schema={schema}
         uiSchema={uiSchema}
         validator={validator}
+        templates={templates}
         widgets={widgets}
         onChange={onChange}
         onSubmit={onSubmit}
