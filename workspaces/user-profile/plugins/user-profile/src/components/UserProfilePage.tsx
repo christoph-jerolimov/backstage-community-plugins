@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 import React from 'react';
-import { Page, Header, Content, InfoCard } from '@backstage/core-components';
-import { Typography, Grid } from '@material-ui/core';
 
-export const UserProfilePage = () => (
-  <Page themeId="user-profile">
-    <Header title="User profile" />
-    <Content>
-      <Grid container spacing={3} direction="column">
-        <Grid item>
-          <InfoCard title="Information card">
-            <Typography variant="body1">
-              All content should be wrapped in a card like this.
-            </Typography>
-          </InfoCard>
-        </Grid>
-      </Grid>
-    </Content>
-  </Page>
-);
+import { Page, Header, Content, InfoCard } from '@backstage/core-components';
+
+import Button from '@material-ui/core/Button';
+
+import { UserProfileForm } from './UserProfileForm';
+
+export const UserProfilePage = () => {
+  const [_, setState] = React.useState(0);
+  const rerender = () => setState(x => x + 1);
+  return (
+    <Page themeId="user-profile">
+      <Header title="User profile" />
+      <Content>
+        <InfoCard>
+          <Button onClick={rerender}>Rerender</Button>
+          <UserProfileForm />
+        </InfoCard>
+      </Content>
+    </Page>
+  );
+};
