@@ -8,16 +8,51 @@
       "properties": {
         "title": {
           "type": "string",
-          "title": "Display name"
+          "title": "Display name",
+          "ui:griditem": {
+            "xs": 12,
+            "md": 6
+          }
         },
+        "email": {
+          "type": "string",
+          "title": "E-Mail",
+          "ui:griditem": {
+            "xs": 12,
+            "md": 6
+          }
+        }
+      },
+      "ui:griditem": {
+        "xs": 12,
+        "md": 6
+      },
+      "ui:template": "infocard"
+    },
+    "teamwork": {
+      "type": "object",
+      "title": "When to connect",
+      "properties": {
         "timezone": {
           "type": "string",
-          "title": "Timezone"
+          "title": "Timezone",
+          "ui:griditem": {
+            "xs": 12,
+            "md": 6
+          }
         },
         "workinghours": {
           "type": "string",
-          "title": "Working hours"
+          "title": "Working hours",
+          "ui:griditem": {
+            "xs": 12,
+            "md": 6
+          }
         }
+      },
+      "ui:griditem": {
+        "xs": 12,
+        "md": 6
       },
       "ui:template": "infocard"
     },
@@ -28,49 +63,72 @@
         "description": {
           "type": "string",
           "title": "",
-          "ui:widget": "markdown"
+          "ui:widget": "markdown",
+          "ui:griditem": {
+            "xs": true
+          }
         }
+      },
+      "ui:griditem": {
+        "xs": 12,
+        "md": 6
       },
       "ui:template": "infocard"
     },
-    "tags": {
-      "type": "array",
-      "title": "Tags",
-      "items": {
-        "type": "string",
-        "title": ""
-      }
-    },
-    "links": {
-      "type": "array",
-      "title": "Links",
-      "items": {
-        "type": "object",
-        "title": "",
-        "properties": {
-          "url": {
+    "more": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "title": "Tags",
+          "items": {
             "type": "string",
-            "title": "URL",
-            "description": "A url in a standard uri format (e.g. https://example.com/some/page)"
+            "title": ""
           },
-          "title": {
-            "type": "string",
-            "title": "Title",
-            "description": "A user friendly display name for the link."
-          },
-          "icon": {
-            "type": "string",
-            "title": "Icon",
-            "description": "A key representing a visual icon to be displayed in the UI."
-          },
-          "type": {
-            "type": "string",
-            "title": "Type",
-            "description": "An optional value to categorize links into specific groups."
+          "ui:griditem": {
+            "xs": 12
           }
         },
-        "required": ["url"]
-      }
+        "links": {
+          "type": "array",
+          "title": "Links",
+          "items": {
+            "type": "object",
+            "title": "",
+            "properties": {
+              "url": {
+                "type": "string",
+                "title": "URL",
+                "description": "A url in a standard uri format (e.g. https://example.com/some/page)"
+              },
+              "title": {
+                "type": "string",
+                "title": "Title",
+                "description": "A user friendly display name for the link."
+              },
+              "icon": {
+                "type": "string",
+                "title": "Icon",
+                "description": "A key representing a visual icon to be displayed in the UI."
+              },
+              "type": {
+                "type": "string",
+                "title": "Type",
+                "description": "An optional value to categorize links into specific groups."
+              }
+            },
+            "required": ["url"]
+          },
+          "ui:griditem": {
+            "xs": 12
+          }
+        }
+      },
+      "ui:griditem": {
+        "xs": 12,
+        "md": 6
+      },
+      "ui:template": "grid"
     }
   },
   "ui:template": "grid",

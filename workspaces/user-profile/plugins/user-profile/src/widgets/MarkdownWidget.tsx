@@ -31,7 +31,9 @@ export const MarkdownWidget = (props: WidgetProps) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <FormLabel style={{ paddingBottom: '4px' }}>{props.label}</FormLabel>
+      {props.label ? (
+        <FormLabel style={{ paddingBottom: '4px' }}>{props.label}</FormLabel>
+      ) : null}
 
       <Tabs
         indicatorColor="secondary"

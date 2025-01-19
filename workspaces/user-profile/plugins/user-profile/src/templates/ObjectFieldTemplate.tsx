@@ -31,16 +31,14 @@ export const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
   if (props.uiSchema?.['ui:template'] === 'infocard') {
     return (
       <InfoCard title={props.title}>
-        <Grid container spacing={2} style={{ marginTop: '10px' }}>
+        <Grid container spacing={2}>
           {props.properties
             .filter(element => !element.hidden)
             .map((element, index) => (
               <Grid
-                item
-                xs={12}
                 key={index}
-                md={6}
-                style={{ marginBottom: '10px' }}
+                item
+                {...element.content.props.uiSchema?.['ui:griditem']}
               >
                 {element.content}
               </Grid>
@@ -52,16 +50,14 @@ export const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
 
   if (props.uiSchema?.['ui:template'] === 'grid') {
     return (
-      <Grid container spacing={2} style={{ marginTop: '10px' }}>
+      <Grid container spacing={2}>
         {props.properties
           .filter(element => !element.hidden)
           .map((element, index) => (
             <Grid
-              item
-              xs={12}
               key={index}
-              md={6}
-              style={{ marginBottom: '10px' }}
+              item
+              {...element.content.props.uiSchema?.['ui:griditem']}
             >
               {element.content}
             </Grid>
