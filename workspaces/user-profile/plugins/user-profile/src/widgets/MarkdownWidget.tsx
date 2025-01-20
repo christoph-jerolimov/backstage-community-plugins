@@ -40,8 +40,8 @@ export const MarkdownWidget = (props: WidgetProps) => {
         value={tab}
         onChange={(_event, value) => setTab(value)}
       >
-        <Tab value="edit" label="Edit" />
-        <Tab value="preview" label="Preview" />
+        <Tab value="edit" label="Edit" disabled={props.disabled} />
+        <Tab value="preview" label="Preview" disabled={props.disabled} />
       </Tabs>
 
       <Divider />

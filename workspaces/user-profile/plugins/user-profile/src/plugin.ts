@@ -76,3 +76,27 @@ export const UserProfileBioCard = userProfilePlugin.provide(
     },
   }),
 );
+
+export const UserProfileTagsCard = userProfilePlugin.provide(
+  createComponentExtension({
+    name: 'UserProfileTagsCard',
+    component: {
+      lazy: () =>
+        import('./components/UserProfileTagsCard').then(
+          m => m.UserProfileTagsCard,
+        ),
+    },
+  }),
+);
+
+export const EntityMemberOfCard = userProfilePlugin.provide(
+  createComponentExtension({
+    name: 'EntityMemberOfCard',
+    component: {
+      lazy: () =>
+        import('./components/EntityMemberOfCard').then(
+          m => m.EntityMemberOfCard,
+        ),
+    },
+  }),
+);

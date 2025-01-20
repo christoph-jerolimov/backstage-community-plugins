@@ -6,11 +6,19 @@ metadata:
   namespace: development
   name: guest
   title: A guest (title)
-  description: '# A guest that should be only used in development!'
+  tags:
+    - guest
+    - user
+  links:
+    - url: https://admin.example-org.com
+      title: Admin Dashboard
+      icon: dashboard
+      type: admin-dashboard
 spec:
   profile:
     email: guest@example.com
     displayName: A guest (displayName)
+    bio: '# A guest that should be only used in development!'
   memberOf: [guests]
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group

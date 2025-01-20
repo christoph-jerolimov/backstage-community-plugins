@@ -20,8 +20,6 @@ import { useApi } from '@backstage/core-plugin-api';
 
 import { extractSchemaFromStep } from '@backstage/plugin-scaffolder-react/alpha';
 
-import Box from '@material-ui/core/Box';
-
 import { IChangeEvent } from '@rjsf/core';
 import Form from '@rjsf/material-ui';
 import {

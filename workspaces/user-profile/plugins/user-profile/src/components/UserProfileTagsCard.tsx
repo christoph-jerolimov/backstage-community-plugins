@@ -13,13 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entity } from '@backstage/catalog-model';
+import React from 'react';
 
-const get = (object: any, path: string) => {
-  return path.split('.').reduce((acc, part) => acc?.[part], object);
-};
+import { InfoCard } from '@backstage/core-components';
 
-export const isUserProfileBioAvailable = (entity: Entity): boolean => {
-  const bio = get(entity, 'spec.profile.bio') ?? entity.metadata.description!;
-  return Boolean(bio);
+import { useEntity } from '@backstage/plugin-catalog-react';
+
+import Chip from '@material-ui/core/Chip';
+
+export const UserProfileTagsCard = () => {
+  const { entity } = useEntity();
+
+  const tags = entity.metadata.tags || [];
+
+  return (
+    <InfoCard title="Tags">
+      {tags.map(tag => (
+        <Chip key={tag} label={tag} />
+      ))}
+    </InfoCard>
+  );
 };

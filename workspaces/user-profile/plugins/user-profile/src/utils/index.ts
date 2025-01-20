@@ -14,3 +14,5 @@
  * limitations under the License.
  */
 export * from './isUserProfileBioAvailable';
+export * from './isUserProfileTagsAvailable';
+export * from './isUserProfileLinksAvailable';

@@ -30,7 +30,7 @@ export const ObjectFieldTemplate = (props: ObjectFieldTemplateProps) => {
 
   if (props.uiSchema?.['ui:template'] === 'infocard') {
     return (
-      <InfoCard title={props.title}>
+      <InfoCard title={props.title} subheader={props.description}>
         <Grid container spacing={2}>
           {props.properties
             .filter(element => !element.hidden)

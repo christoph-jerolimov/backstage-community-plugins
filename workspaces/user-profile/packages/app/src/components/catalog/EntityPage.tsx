@@ -76,8 +76,12 @@ import {
 
 import {
   isUserProfileBioAvailable,
+  isUserProfileTagsAvailable,
+  isUserProfileLinksAvailable,
   UserProfileForm,
   UserProfileBioCard,
+  UserProfileTagsCard,
+  EntityMemberOfCard,
 } from '@backstage-community/plugin-user-profile';
 
 const techdocsContent = (
@@ -318,19 +322,43 @@ const apiPage = (
 const userPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3}>
+      <Grid container spacing={3} alignItems="flex-start">
         {entityWarningContent}
-        <Grid item xs={12} md={6}>
-          <EntityUserProfileCard variant="gridItem" />
 
+        <Grid container item md={6} spacing={3}>
+          <Grid item xs={12}>
+            <EntityUserProfileCard variant="gridItem" />
+          </Grid>
           <EntitySwitch>
             <EntitySwitch.Case if={isUserProfileBioAvailable}>
-              <UserProfileBioCard />
+              <Grid item xs={12}>
+                <UserProfileBioCard />
+              </Grid>
+            </EntitySwitch.Case>
+          </EntitySwitch>
+          <EntitySwitch>
+            <EntitySwitch.Case if={isUserProfileLinksAvailable}>
+              <Grid item xs={12}>
+                <EntityLinksCard />
+              </Grid>
+            </EntitySwitch.Case>
+          </EntitySwitch>
+          <EntitySwitch>
+            <EntitySwitch.Case if={isUserProfileTagsAvailable}>
+              <Grid item xs={12}>
+                <UserProfileTagsCard />
+              </Grid>
             </EntitySwitch.Case>
           </EntitySwitch>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <EntityOwnershipCard variant="gridItem" />
+
+        <Grid container item md={6} spacing={3}>
+          <Grid item xs={12}>
+            <EntityMemberOfCard variant="gridItem" />
+          </Grid>
+          <Grid item xs={12}>
+            <EntityOwnershipCard variant="gridItem" />
+          </Grid>
         </Grid>
       </Grid>
     </EntityLayout.Route>

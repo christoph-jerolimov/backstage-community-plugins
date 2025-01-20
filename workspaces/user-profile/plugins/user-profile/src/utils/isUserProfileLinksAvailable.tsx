@@ -15,11 +15,6 @@
  */
 import { Entity } from '@backstage/catalog-model';
 
-const get = (object: any, path: string) => {
-  return path.split('.').reduce((acc, part) => acc?.[part], object);
-};
-
-export const isUserProfileBioAvailable = (entity: Entity): boolean => {
-  const bio = get(entity, 'spec.profile.bio') ?? entity.metadata.description!;
-  return Boolean(bio);
+export const isUserProfileLinksAvailable = (entity: Entity): boolean => {
+  return !!entity.metadata.links && entity.metadata.links.length > 0;
 };

@@ -19,10 +19,14 @@ import { InfoCard, MarkdownContent } from '@backstage/core-components';
 
 import { useEntity } from '@backstage/plugin-catalog-react';
 
+const get = (object: any, path: string) => {
+  return path.split('.').reduce((acc, part) => acc?.[part], object);
+};
+
 export const UserProfileBioCard = () => {
   const { entity } = useEntity();
 
-  const bio = entity.metadata.description!;
+  const bio = get(entity, 'spec.profile.bio') ?? entity.metadata.description!;
 
   return (
     <InfoCard title="Bio">

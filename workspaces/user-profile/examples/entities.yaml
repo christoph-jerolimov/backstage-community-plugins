@@ -5,17 +5,25 @@ kind: System
 metadata:
   name: examples
 spec:
-  owner: guests
+  owner: user:development/guest
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: example-website
+  tags:
+    - guest
+    - user
+  links:
+    - url: https://admin.example-org.com
+      title: Admin Dashboard
+      icon: dashboard
+      type: admin-dashboard
 spec:
   type: website
   lifecycle: experimental
-  owner: guests
+  owner: user:development/guest
   system: examples
   providesApis: [example-grpc-api]
 ---
@@ -27,7 +35,7 @@ metadata:
 spec:
   type: grpc
   lifecycle: experimental
-  owner: guests
+  owner: user:development/guest
   system: examples
   definition: |
     syntax = "proto3";
