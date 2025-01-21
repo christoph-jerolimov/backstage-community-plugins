@@ -65,6 +65,18 @@ export const UserProfileForm = userProfilePlugin.provide(
   }),
 );
 
+export const UserProfileFormEntityCard = userProfilePlugin.provide(
+  createComponentExtension({
+    name: 'UserProfileFormEntityCard',
+    component: {
+      lazy: () =>
+        import('./components/UserProfileFormEntityCard').then(
+          m => m.UserProfileFormEntityCard,
+        ),
+    },
+  }),
+);
+
 export const UserProfileBioCard = userProfilePlugin.provide(
   createComponentExtension({
     name: 'UserProfileBioCard',

@@ -15,7 +15,7 @@
  */
 import { DiscoveryApi, FetchApi } from '@backstage/core-plugin-api';
 
-import { UserProfileBackendApi } from './UserProfileBackendApi';
+import { UserProfile, UserProfileBackendApi } from './UserProfileBackendApi';
 
 export type Options = {
   discoveryApi: DiscoveryApi;
@@ -31,10 +31,17 @@ export class UserProfileBackendClient implements UserProfileBackendApi {
     this.fetchApi = options.fetchApi;
   }
 
-  async getUserProfile(): Promise<any> {
+  async getUserProfile(entityRef: string): Promise<any> {
     const baseUrl = await this.discoveryApi.getBaseUrl('user-profile');
-    const url = `${baseUrl}`;
-    const response = await this.fetchApi.fetch(url);
+    const url = `${baseUrl}/catalog/entities/${encodeURIComponent(
+      entityRef,
+    )}/profile`;
+    const response = await this.fetchApi.fetch(url, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+    // TODO: use backstage error handling
     if (!response.ok) {
       throw new Error(
         `Unexpected status code: ${response.status} ${response.statusText}`,
@@ -43,13 +50,23 @@ export class UserProfileBackendClient implements UserProfileBackendApi {
     return response.json();
   }
 
-  async updateUserProfile(userProfile: any): Promise<any> {
+  async updateUserProfile(
+    entityRef: string,
+    userProfile: UserProfile,
+  ): Promise<UserProfile> {
     const baseUrl = await this.discoveryApi.getBaseUrl('user-profile');
-    const url = `${baseUrl}`;
+    const url = `${baseUrl}/catalog/entities/${encodeURIComponent(
+      entityRef,
+    )}/profile`;
     const response = await this.fetchApi.fetch(url, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
       body: JSON.stringify(userProfile),
     });
+    // TODO: use backstage error handling
     if (!response.ok) {
       throw new Error(
         `Unexpected status code: ${response.status} ${response.statusText}`,

@@ -78,7 +78,7 @@ import {
   isUserProfileBioAvailable,
   isUserProfileTagsAvailable,
   isUserProfileLinksAvailable,
-  UserProfileForm,
+  UserProfileFormEntityCard,
   UserProfileBioCard,
   UserProfileTagsCard,
   EntityMemberOfCard,
@@ -354,7 +354,10 @@ const userPage = (
 
         <Grid container item md={6} spacing={3}>
           <Grid item xs={12}>
-            <EntityMemberOfCard variant="gridItem" />
+            <EntityMemberOfCard
+              variant="gridItem"
+              tableOptions={{ search: true }}
+            />
           </Grid>
           <Grid item xs={12}>
             <EntityOwnershipCard variant="gridItem" />
@@ -364,7 +367,7 @@ const userPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/profile" title="User Profile">
-      <UserProfileForm />
+      <UserProfileFormEntityCard />
     </EntityLayout.Route>
   </EntityLayout>
 );

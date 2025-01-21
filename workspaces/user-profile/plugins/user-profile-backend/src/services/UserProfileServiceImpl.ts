@@ -33,6 +33,8 @@ export type Options = {
   catalog: typeof catalogServiceRef.T;
 };
 
+const storage: Record<string, UserProfile> = {};
+
 export class UserProfileServiceImpl implements UserProfileService {
   private readonly logger: LoggerService;
   private readonly auth: AuthService;
@@ -46,34 +48,40 @@ export class UserProfileServiceImpl implements UserProfileService {
     this.catalog = options.catalog;
   }
 
-  async updateUserProfile(
+  async getUserProfile(
+    credentials: BackstageCredentials<BackstageUserPrincipal>,
     entityRef: string,
-    userProfile: UserProfile,
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
   ): Promise<UserProfile> {
-    const { token } = await this.auth.getPluginRequestToken({
-      onBehalfOf: options.credentials,
-      targetPluginId: 'catalog',
-    });
-    const entity = await this.catalog.getEntityByRef(entityRef, {
-      token,
-    });
-    if (!entity) {
-      throw new NotFoundError(`No entity found for ref '${entityRef}'`);
-    }
-    return { description: '' };
+    await this.checkEntityReadAccess(credentials, entityRef);
+
+    return storage[entityRef] ?? {};
   }
 
-  async getUserProfile(
+  async updateUserProfile(
+    credentials: BackstageCredentials<BackstageUserPrincipal>,
     entityRef: string,
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
+    userProfile: UserProfile,
   ): Promise<UserProfile> {
+    this.logger.info('Update user profile', {
+      entityRef,
+      userProfile: JSON.stringify(userProfile),
+    });
+    await this.checkEntityReadAccess(credentials, entityRef);
+
+    storage[entityRef] = userProfile;
+
+    await this.refreshEntity(entityRef);
+
+    return userProfile;
+  }
+
+  private async checkEntityReadAccess(
+    credentials: BackstageCredentials<BackstageUserPrincipal>,
+    entityRef: string,
+  ) {
+    this.logger.info('Get user profile', { entityRef });
     const { token } = await this.auth.getPluginRequestToken({
-      onBehalfOf: options.credentials,
+      onBehalfOf: credentials,
       targetPluginId: 'catalog',
     });
     const entity = await this.catalog.getEntityByRef(entityRef, {
@@ -82,6 +90,13 @@ export class UserProfileServiceImpl implements UserProfileService {
     if (!entity) {
       throw new NotFoundError(`No entity found for ref '${entityRef}'`);
     }
-    return { description: '' };
+  }
+
+  private async refreshEntity(entityRef: string) {
+    const { token } = await this.auth.getPluginRequestToken({
+      onBehalfOf: await this.auth.getOwnServiceCredentials(),
+      targetPluginId: 'catalog',
+    });
+    await this.catalog.refreshEntity(entityRef, { token });
   }
 }

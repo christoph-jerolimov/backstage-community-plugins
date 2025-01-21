@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import React from 'react';
 
-/**
- * @public
- */
-export type UserProfile = Record<string, any>;
+import { useEntity } from '@backstage/plugin-catalog-react';
+import { UserProfileForm } from './UserProfileForm';
+import { stringifyEntityRef } from '@backstage/catalog-model';
 
-/**
- * @public
- */
-export interface UserProfileBackendApi {
-  getUserProfile(entityRef: string): Promise<UserProfile>;
-
-  updateUserProfile(
-    entityRef: string,
-    userProfile: UserProfile,
-  ): Promise<UserProfile>;
-}
+export const UserProfileFormEntityCard = () => {
+  const { entity } = useEntity();
+  const entityRef = stringifyEntityRef(entity);
+  return <UserProfileForm entityRef={entityRef} />;
+};

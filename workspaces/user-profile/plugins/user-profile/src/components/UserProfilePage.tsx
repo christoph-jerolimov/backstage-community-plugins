@@ -16,20 +16,33 @@
 import React from 'react';
 
 import { Page, Header, Content } from '@backstage/core-components';
+import { identityApiRef, useApi } from '@backstage/core-plugin-api';
 
 import Button from '@material-ui/core/Button';
+
+import useAsync from 'react-use/esm/useAsync';
 
 import { UserProfileForm } from './UserProfileForm';
 
 export const UserProfilePage = () => {
+  const identityApi = useApi(identityApiRef);
+  const { value: identity } = useAsync(() =>
+    identityApi.getBackstageIdentity(),
+  );
+
+  // TODO: remove rerender button
   const [_, setState] = React.useState(0);
   const rerender = () => setState(x => x + 1);
+
+  // TOOD: show loading indicator and error!
   return (
     <Page themeId="user-profile">
       <Header title="User profile" />
       <Content>
         <Button onClick={rerender}>Rerender</Button>
-        <UserProfileForm />
+        {identity ? (
+          <UserProfileForm entityRef={identity.userEntityRef} />
+        ) : null}
       </Content>
     </Page>
   );

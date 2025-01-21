@@ -1,0 +1,95 @@
+# Data from the Planet Express company of Futurama
+# Extract from https://github.com/ldapjs/docker-test-openldap
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: admin_staff
+spec:
+  type: team
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ship_crew
+spec:
+  type: team
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: professor
+  title: Hubert J. Farnsworth
+spec:
+  profile:
+    email: professor@planetexpress.com
+    displayName: Professor Farnsworth
+  memberOf: [admin_staff]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: fry
+  title: Philip J. Fry
+spec:
+  profile:
+    email: fry@planetexpress.com
+    displayName: Fry
+  memberOf: [ship_crew]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: zoidberg
+  title: John A. Zoidberg
+spec:
+  profile:
+    email: zoidberg@planetexpress.com
+    displayName: Zoidberg
+  memberOf: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: hermes
+  title: Hermes Conrad
+spec:
+  profile:
+    email: hermes@planetexpress.com
+  memberOf: [admin_staff]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: leela
+  title: Turanga Leela
+spec:
+  profile:
+    email: leela@planetexpress.com
+    displayName: Captain Leela
+  memberOf: [ship_crew]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: bender
+  title: Bender Bending Rodríguez
+spec:
+  profile:
+    email: bender@planetexpress.com
+    displayName: Bender
+  memberOf: [ship_crew]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: amy
+  title: Amy Wong
+spec:
+  profile:
+    email: amy@planetexpress.com
+    displayName: Amy
+  memberOf: []
+---

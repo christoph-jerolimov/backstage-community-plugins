@@ -18,23 +18,17 @@ import {
   BackstageUserPrincipal,
 } from '@backstage/backend-plugin-api';
 
-export interface UserProfile {
-  description: string;
-}
+export type UserProfile = Record<string, unknown>;
 
 export interface UserProfileService {
-  updateUserProfile(
+  getUserProfile(
+    credentials: BackstageCredentials<BackstageUserPrincipal>,
     entityRef: string,
-    userProfile: UserProfile,
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
   ): Promise<UserProfile>;
 
-  getUserProfile(
+  updateUserProfile(
+    credentials: BackstageCredentials<BackstageUserPrincipal>,
     entityRef: string,
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
+    userProfile: UserProfile,
   ): Promise<UserProfile>;
 }

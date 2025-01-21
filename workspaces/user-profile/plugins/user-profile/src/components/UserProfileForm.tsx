@@ -17,6 +17,7 @@ import React, { FormEvent } from 'react';
 
 import { ErrorPanel, Progress } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
+import { Entity } from '@backstage/catalog-model';
 
 import { extractSchemaFromStep } from '@backstage/plugin-scaffolder-react/alpha';
 
@@ -50,7 +51,11 @@ interface State {
   error?: Error;
 }
 
-export const UserProfileForm = () => {
+export interface UserProfileFormProps {
+  entityRef: string;
+}
+
+export const UserProfileForm = (props: UserProfileFormProps) => {
   const api = useApi(userProfileBackendApiRef);
   const [state, setState] = React.useState<State>({ loading: true });
 
@@ -60,7 +65,7 @@ export const UserProfileForm = () => {
   );
 
   React.useEffect(() => {
-    api.getUserProfile().then(
+    api.getUserProfile(props.entityRef).then(
       (data: any) => {
         setState({ loading: false, data });
       },
@@ -68,7 +73,7 @@ export const UserProfileForm = () => {
         setState({ loading: false, error });
       },
     );
-  }, [api]);
+  }, [props.entityRef, api]);
 
   // eslint-disable-next-line no-console
   console.log('DEBUG UserProfileForm schema', schema);
@@ -91,7 +96,7 @@ export const UserProfileForm = () => {
     console.log('DEBUG UserProfileForm form errors', data.errors);
     // eslint-disable-next-line no-console
     console.log('DEBUG UserProfileForm form data', data.formData);
-    api.updateUserProfile(data.formData).then(
+    api.updateUserProfile(props.entityRef, data.formData).then(
       (updatedData: any) => {
         setState({ loading: false, data: updatedData });
       },
@@ -116,6 +121,7 @@ export const UserProfileForm = () => {
       ) : null}
       <Form
         disabled={state.loading || !!state.error}
+        formData={state.data}
         schema={schema}
         uiSchema={uiSchema}
         validator={validator}

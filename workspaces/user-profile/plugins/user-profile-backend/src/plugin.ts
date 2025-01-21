@@ -16,6 +16,7 @@
 import {
   coreServices,
   createBackendPlugin,
+  resolvePackagePath,
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
@@ -35,11 +36,32 @@ export const userProfilePlugin = createBackendPlugin({
         logger: coreServices.logger,
         auth: coreServices.auth,
         config: coreServices.rootConfig,
+        database: coreServices.database,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         catalog: catalogServiceRef,
       },
-      async init({ logger, auth, config, httpAuth, httpRouter, catalog }) {
+      async init({
+        logger,
+        auth,
+        config,
+        database,
+        httpAuth,
+        httpRouter,
+        catalog,
+      }) {
+        const client = await database.getClient();
+
+        // const migrationsDir = resolvePackagePath(
+        //   '@internal/user-profile',
+        //   'migrations',
+        // );
+        // if (!database.migrations?.skip) {
+        //   await client.migrate.latest({
+        //     directory: migrationsDir,
+        //   });
+        // }
+
         const userProfileService: UserProfileService =
           new UserProfileServiceImpl({
             logger,

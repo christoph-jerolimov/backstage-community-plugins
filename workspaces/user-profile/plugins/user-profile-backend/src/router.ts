@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 import { HttpAuthService } from '@backstage/backend-plugin-api';
-import { InputError } from '@backstage/errors';
-import { z } from 'zod';
 import express from 'express';
 import Router from 'express-promise-router';
 import { UserProfileService } from './services/UserProfileService';
@@ -30,32 +28,27 @@ export async function createRouter({
   const router = Router();
   router.use(express.json());
 
-  const userProfileSchema = z.object({
-    description: z.string(),
-  });
+  router.get('/catalog/entities/:entityRef/profile', async (req, res) => {
+    const credentials = await httpAuth.credentials(req, { allow: ['user'] });
 
-  router.post('/:entityRef', async (req, res) => {
-    const parsed = userProfileSchema.safeParse(req.body);
-    if (!parsed.success) {
-      throw new InputError(parsed.error.toString());
-    }
-    const userProfile = await userProfileService.updateUserProfile(
+    const userProfile = await userProfileService.getUserProfile(
+      credentials,
       req.params.entityRef,
-      parsed.data,
-      {
-        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-      },
     );
+
     res.json(userProfile);
   });
 
-  router.get('/:entityRef', async (req, res) => {
-    const userProfile = await userProfileService.getUserProfile(
+  router.post('/catalog/entities/:entityRef/profile', async (req, res) => {
+    const credentials = await httpAuth.credentials(req, { allow: ['user'] });
+
+    // TODO: how can we verify that the body is a valid JSON object?
+    const userProfile = await userProfileService.updateUserProfile(
+      credentials,
       req.params.entityRef,
-      {
-        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-      },
+      req.body,
     );
+
     res.json(userProfile);
   });
 
