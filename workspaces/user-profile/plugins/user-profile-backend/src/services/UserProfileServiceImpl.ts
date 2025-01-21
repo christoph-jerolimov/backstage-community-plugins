@@ -23,29 +23,32 @@ import {
 import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 
+import { Knex } from 'knex';
+
 import { UserProfile, UserProfileService } from './UserProfileService';
+import { ProfileTable } from '../types';
 
 export type Options = {
   logger: LoggerService;
   auth: AuthService;
   config: RootConfigService;
-  // TODO update CatalogService
   catalog: typeof catalogServiceRef.T;
+  dbClient: Knex;
 };
-
-const storage: Record<string, UserProfile> = {};
 
 export class UserProfileServiceImpl implements UserProfileService {
   private readonly logger: LoggerService;
   private readonly auth: AuthService;
   private readonly config: RootConfigService;
   private readonly catalog: typeof catalogServiceRef.T;
+  private readonly dbClient: Knex;
 
   constructor(options: Options) {
     this.logger = options.logger;
     this.auth = options.auth;
     this.config = options.config;
     this.catalog = options.catalog;
+    this.dbClient = options.dbClient;
   }
 
   async getUserProfile(
@@ -54,7 +57,19 @@ export class UserProfileServiceImpl implements UserProfileService {
   ): Promise<UserProfile> {
     await this.checkEntityReadAccess(credentials, entityRef);
 
-    return storage[entityRef] ?? {};
+    const profile = await this.dbClient
+      .table<ProfileTable>('profiles')
+      .select('*')
+      .where({
+        entity_ref: entityRef,
+        deleted_at: null,
+      });
+
+    if (!profile.length) {
+      return {};
+    }
+
+    return JSON.parse(profile[0].profile);
   }
 
   async updateUserProfile(
@@ -68,7 +83,20 @@ export class UserProfileServiceImpl implements UserProfileService {
     });
     await this.checkEntityReadAccess(credentials, entityRef);
 
-    storage[entityRef] = userProfile;
+    await this.dbClient.transaction(async trx => {
+      await trx<ProfileTable>('profiles')
+        .where({
+          entity_ref: entityRef,
+          deleted_at: null,
+        })
+        .update({
+          deleted_at: new Date(),
+        });
+      await trx<ProfileTable>('profiles').insert({
+        entity_ref: entityRef,
+        profile: JSON.stringify(userProfile),
+      });
+    });
 
     await this.refreshEntity(entityRef);
 

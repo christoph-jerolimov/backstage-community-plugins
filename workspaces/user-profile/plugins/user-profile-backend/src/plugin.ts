@@ -50,17 +50,17 @@ export const userProfilePlugin = createBackendPlugin({
         httpRouter,
         catalog,
       }) {
-        const client = await database.getClient();
+        const dbClient = await database.getClient();
 
-        // const migrationsDir = resolvePackagePath(
-        //   '@internal/user-profile',
-        //   'migrations',
-        // );
-        // if (!database.migrations?.skip) {
-        //   await client.migrate.latest({
-        //     directory: migrationsDir,
-        //   });
-        // }
+        const migrationsDir = resolvePackagePath(
+          '@backstage-community/plugin-user-profile-backend',
+          'migrations',
+        );
+        if (!database.migrations?.skip) {
+          await dbClient.migrate.latest({
+            directory: migrationsDir,
+          });
+        }
 
         const userProfileService: UserProfileService =
           new UserProfileServiceImpl({
@@ -68,6 +68,7 @@ export const userProfilePlugin = createBackendPlugin({
             auth,
             config,
             catalog,
+            dbClient,
           });
 
         httpRouter.use(
