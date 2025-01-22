@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// TODO: move into shared node package
 export interface ProfileTable {
   entity_ref: string;
   profile: string;

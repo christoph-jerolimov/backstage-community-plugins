@@ -2759,11 +2759,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-catalog-backend-module-user-profile@workspace:plugins/catalog-backend-module-user-profile"
   dependencies:
+    "@backstage/backend-defaults": ^0.7.0
     "@backstage/backend-plugin-api": ^1.1.1
     "@backstage/backend-test-utils": ^1.2.1
     "@backstage/catalog-model": ^1.7.3
     "@backstage/cli": ^0.29.5
     "@backstage/plugin-catalog-node": ^1.15.1
+    knex: ^3.1.0
   languageName: unknown
   linkType: soft
 

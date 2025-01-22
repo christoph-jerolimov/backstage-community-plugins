@@ -26,7 +26,8 @@ const get = (object: any, path: string) => {
 export const UserProfileBioCard = () => {
   const { entity } = useEntity();
 
-  const bio = get(entity, 'spec.profile.bio') ?? entity.metadata.description!;
+  const bio =
+    get(entity, 'spec.profile.bio.description') ?? entity.metadata.description!;
 
   return (
     <InfoCard title="Bio">

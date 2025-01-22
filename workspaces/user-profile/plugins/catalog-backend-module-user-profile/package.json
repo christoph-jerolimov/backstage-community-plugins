@@ -24,9 +24,11 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
+    "@backstage/backend-defaults": "^0.7.0",
     "@backstage/backend-plugin-api": "^1.1.1",
     "@backstage/catalog-model": "^1.7.3",
-    "@backstage/plugin-catalog-node": "^1.15.1"
+    "@backstage/plugin-catalog-node": "^1.15.1",
+    "knex": "^3.1.0"
   },
   "devDependencies": {
     "@backstage/backend-test-utils": "^1.2.1",

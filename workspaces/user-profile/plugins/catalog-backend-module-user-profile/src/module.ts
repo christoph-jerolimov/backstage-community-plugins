@@ -18,6 +18,8 @@ import {
   createBackendModule,
 } from '@backstage/backend-plugin-api';
 import { catalogProcessingExtensionPoint } from '@backstage/plugin-catalog-node/alpha';
+import { DatabaseManager } from '@backstage/backend-defaults/database';
+
 import { UserProfileCatalogProcessor } from './UserProfileCatalogProcessor';
 
 export const catalogModuleUserProfile = createBackendModule({
@@ -27,11 +29,23 @@ export const catalogModuleUserProfile = createBackendModule({
     reg.registerInit({
       deps: {
         logger: coreServices.logger,
+        config: coreServices.rootConfig,
         catalog: catalogProcessingExtensionPoint,
+        lifecycle: coreServices.lifecycle,
       },
-      async init({ logger, catalog }) {
-        logger.info('Hello World!');
-        catalog.addProcessor(new UserProfileCatalogProcessor());
+      async init({ logger, config, catalog, lifecycle }) {
+        const db = DatabaseManager.fromConfig(config).forPlugin(
+          'user-profile',
+          {
+            logger,
+            lifecycle,
+          },
+        );
+        const dbClient = await db.getClient();
+
+        catalog.addProcessor(
+          new UserProfileCatalogProcessor({ logger, dbClient }),
+        );
       },
     });
   },

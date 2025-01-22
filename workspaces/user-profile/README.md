@@ -4,9 +4,9 @@
 
 ## 0.1
 
-- Use database as backend
+- ~~Use database to store data~~
 - Profile picture support
-- Add config to customize profile form
+- Add app-config support to customize form
 
 - Verify users can change only their own profile
 - Verify users can read only profiles where they can read the catalog entity

@@ -6,7 +6,7 @@
       "type": "object",
       "title": "About",
       "properties": {
-        "title": {
+        "displayName": {
           "type": "string",
           "title": "Display name",
           "ui:griditem": {

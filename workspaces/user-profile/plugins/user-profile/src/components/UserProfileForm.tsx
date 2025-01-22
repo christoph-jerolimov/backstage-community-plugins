@@ -17,7 +17,6 @@ import React, { FormEvent } from 'react';
 
 import { ErrorPanel, Progress } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
-import { Entity } from '@backstage/catalog-model';
 
 import { extractSchemaFromStep } from '@backstage/plugin-scaffolder-react/alpha';
 

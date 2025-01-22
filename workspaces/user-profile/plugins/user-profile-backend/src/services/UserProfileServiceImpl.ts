@@ -83,8 +83,9 @@ export class UserProfileServiceImpl implements UserProfileService {
     });
     await this.checkEntityReadAccess(credentials, entityRef);
 
-    await this.dbClient.transaction(async trx => {
-      await trx<ProfileTable>('profiles')
+    // TODO: why does this transaction doesn't work?
+    await this.dbClient.transaction(async tx => {
+      await tx<ProfileTable>('profiles')
         .where({
           entity_ref: entityRef,
           deleted_at: null,
@@ -92,7 +93,7 @@ export class UserProfileServiceImpl implements UserProfileService {
         .update({
           deleted_at: new Date(),
         });
-      await trx<ProfileTable>('profiles').insert({
+      await tx<ProfileTable>('profiles').insert({
         entity_ref: entityRef,
         profile: JSON.stringify(userProfile),
       });
