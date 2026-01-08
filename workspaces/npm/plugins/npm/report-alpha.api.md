@@ -75,30 +75,30 @@ export const npmTranslationRef: TranslationRef<
   'plugin.npm.translation-ref',
   {
     readonly 'infoCard.title': 'NPM package {{packageName}}';
-    readonly 'infoCard.description': 'Description';
-    readonly 'infoCard.license': 'License';
-    readonly 'infoCard.homepage': 'Homepage';
     readonly 'infoCard.latestVersion': 'Latest version';
     readonly 'infoCard.publishedAt': 'Published at';
+    readonly 'infoCard.license': 'License';
+    readonly 'infoCard.description': 'Description';
     readonly 'infoCard.keywords': 'Keywords';
     readonly 'infoCard.registryName': 'Registry name';
     readonly 'infoCard.npmRepository': 'NPM repository';
     readonly 'infoCard.codeRepository': 'Code repository';
     readonly 'infoCard.issueTracker': 'Issue tracker';
-    readonly 'releaseOverviewCard.columns.version': 'Version';
-    readonly 'releaseOverviewCard.columns.tag': 'Tag';
-    readonly 'releaseOverviewCard.columns.published': 'Published';
+    readonly 'infoCard.homepage': 'Homepage';
     readonly 'releaseOverviewCard.title': 'Current Tags';
     readonly 'releaseOverviewCard.toolbar.searchPlaceholder': 'Search';
-    readonly 'releaseTableCard.columns.version': 'Version';
-    readonly 'releaseTableCard.columns.tag': 'Tag';
-    readonly 'releaseTableCard.columns.published': 'Published';
+    readonly 'releaseOverviewCard.columns.tag': 'Tag';
+    readonly 'releaseOverviewCard.columns.version': 'Version';
+    readonly 'releaseOverviewCard.columns.published': 'Published';
     readonly 'releaseTableCard.title': 'Current Tags';
     readonly 'releaseTableCard.toolbar.searchPlaceholder': 'Search';
-    readonly 'versionHistoryCard.columns.version': 'Version';
-    readonly 'versionHistoryCard.columns.published': 'Published';
+    readonly 'releaseTableCard.columns.tag': 'Tag';
+    readonly 'releaseTableCard.columns.version': 'Version';
+    readonly 'releaseTableCard.columns.published': 'Published';
     readonly 'versionHistoryCard.title': 'Version History';
     readonly 'versionHistoryCard.toolbar.searchPlaceholder': 'Search';
+    readonly 'versionHistoryCard.columns.version': 'Version';
+    readonly 'versionHistoryCard.columns.published': 'Published';
   }
 >;
 
