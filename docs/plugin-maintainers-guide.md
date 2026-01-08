@@ -279,6 +279,26 @@ The `package.json` for your plugin might be missing required fields or have inco
 2.  Run `yarn backstage-cli repo fix --publish`
 3.  This will check for and automatically fix common `package.json` issues. Commit any changes.
 
+### My CI workflow is failing with some Node versions.
+
+The CI workflow runs your tests automatically with all versions configured in your workspace root `package.json`, configured under "engines.node".
+
+We recommend this configurations for workspaces up to Backstage 1.45:
+
+```json
+  "engines": {
+    "node": "20 || 22"
+  },
+```
+
+And starting with Backstage 1.46:
+
+```json
+  "engines": {
+    "node": "22 || 24"
+  },
+```
+
 ### My CI workflow is failing due to linting errors.
 
 This means your code doesn't match the project's automatic formatting rules.
