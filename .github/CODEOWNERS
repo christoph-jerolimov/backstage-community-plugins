@@ -42,6 +42,7 @@ yarn.lock                                                               @backsta
 /workspaces/cloudbuild                                                  @backstage/community-plugins-maintainers
 /workspaces/code-climate                                                @backstage/community-plugins-maintainers
 /workspaces/code-coverage                                               @backstage/community-plugins-maintainers  @alde
+/workspaces/codecov                                                     @backstage/community-plugins-maintainers  @christoph-jerolimov
 /workspaces/codescene                                                   @backstage/community-plugins-maintainers
 /workspaces/confluence                                                  @backstage/community-plugins-maintainers  @fjudith
 /workspaces/confluence/plugins/techdocs-backend-module-confluence       @backstage/community-plugins-maintainers  @joelml
