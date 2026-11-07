@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './coverage';
 
 import { npmjsExamples } from '../examples/npmjs-examples';
 import { navigateToCatalogIfPresent, skipLoginIfPresent } from './test-utils';

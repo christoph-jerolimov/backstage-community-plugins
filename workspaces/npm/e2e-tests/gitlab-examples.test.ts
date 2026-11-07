@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './coverage';
 
 import { gitlabExamples } from '../examples/gitlab-examples';
 import { navigateToCatalogIfPresent, skipLoginIfPresent } from './test-utils';

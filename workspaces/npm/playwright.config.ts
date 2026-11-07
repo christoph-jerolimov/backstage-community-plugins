@@ -17,6 +17,8 @@
 import { defineConfig } from '@playwright/test';
 import { generateProjects } from '@backstage/e2e-test-utils/playwright';
 
+import { backendRawCoverageDir } from './e2e-tests/coverage-paths';
+
 const appMode: string | undefined = process.env.APP_MODE;
 
 /**
@@ -36,6 +38,10 @@ export default defineConfig({
       port: 3000,
       reuseExistingServer: true,
       timeout: 60_000,
+      // Let the backend record its coverage, see e2e-tests/coverage-reporter.ts
+      env: { NODE_V8_COVERAGE: backendRawCoverageDir },
+      // Node writes the coverage on a graceful exit, not on the default SIGKILL
+      gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
     },
   ],
 
@@ -43,7 +49,10 @@ export default defineConfig({
 
   retries: process.env.CI ? 2 : 0,
 
-  reporter: [['html', { open: 'never', outputFolder: 'e2e-test-report' }]],
+  reporter: [
+    ['html', { open: 'never', outputFolder: 'e2e-test-report' }],
+    ['./e2e-tests/coverage-reporter.ts'],
+  ],
 
   use: {
     actionTimeout: 0,

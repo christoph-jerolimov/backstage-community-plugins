@@ -182,6 +182,8 @@ When enabled:
 
 No changes to your test configuration are needed. The existing `backstage-cli repo test --coverage` command already produces the coverage data that Codecov consumes.
 
+Coverage from Playwright tests can be included as well. Both workflows run the Playwright tests of workspaces that opted in via `"playwrightTests": true` before uploading, and the upload picks up every coverage file found in the workspace. A workspace only has to write an `lcov.info` with repository-relative paths into a git-ignored folder. The [npm](/workspaces/npm/) workspace does this with a Playwright fixture that records the browser coverage, `NODE_V8_COVERAGE` for the backend, and a [reporter](/workspaces/npm/e2e-tests/coverage-reporter.ts) that converts both into `coverage-e2e/lcov.info`.
+
 ## Maintaining and patching an older release line
 
 It may be necessary to patch a prior release line of a plugin when users depend on an older, but stable version and while a newer, incompatible, major version of the plugin exists. Typically for these older releases, only major bugs and security issues will need to be remediated. Not every plugin will need this workflow.

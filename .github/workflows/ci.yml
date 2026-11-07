@@ -60,7 +60,7 @@ jobs:
     env:
       CI: true
       NODE_OPTIONS: --max-old-space-size=8192
-    
+
     services:
       postgres18:
         image: postgres:18
@@ -222,6 +222,8 @@ jobs:
             echo "codecov=false" >> $GITHUB_OUTPUT
           fi
 
+      # Uploads every coverage file found in the workspace: the Jest output in
+      # coverage/ and, if the Playwright tests write one, e.g. coverage-e2e/lcov.info
       - name: Upload coverage to Codecov
         if: ${{ steps.bcpCodecov.outputs.codecov == 'true' }}
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0

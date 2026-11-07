@@ -17,7 +17,11 @@
 import { Page } from '@playwright/test';
 
 export async function skipLoginIfPresent(page: Page) {
-  if (await page.getByText('Select a sign-in method').isVisible()) {
+  // The app renders after the page load event (and noticeably later while
+  // coverage is collected), so wait for either the sign-in page or the app.
+  const signIn = page.getByText('Select a sign-in method');
+  await signIn.or(page.getByRole('link').first()).first().waitFor();
+  if (await signIn.isVisible()) {
     page.once('dialog', async dialog => {
       await dialog.accept();
     });

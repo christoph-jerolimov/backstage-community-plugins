@@ -5,6 +5,10 @@
 # the per-workspace baselines that Codecov uses to calculate coverage
 # deltas in PRs (via carryforward).
 #
+# Like ci.yml, it runs the Playwright tests of workspaces that opted in via
+# "playwrightTests": true, so that coverage they write (e.g. coverage-e2e/)
+# becomes part of the baseline as well.
+#
 # PR-level coverage is handled by the upload step in ci.yml; this
 # workflow only covers push events so the two never duplicate work.
 
@@ -14,7 +18,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "workspaces/**"
+      - 'workspaces/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -128,6 +132,24 @@ jobs:
           BACKSTAGE_TEST_DATABASE_POSTGRES18_CONNECTION_STRING: postgresql://postgres:postgres@localhost:${{ job.services.postgres18.ports[5432] }}
           BACKSTAGE_TEST_DATABASE_POSTGRES14_CONNECTION_STRING: postgresql://postgres:postgres@localhost:${{ job.services.postgres14.ports[5432] }}
 
+      - name: Read playwrightTests flag from bcp.json
+        id: bcpPlaywrightTests
+        run: |
+          if [ -f bcp.json ]; then
+            PLAYWRIGHT_TESTS=$(jq -r '.["playwrightTests"] // "false"' bcp.json)
+            echo "playwright_tests=$PLAYWRIGHT_TESTS" >> $GITHUB_OUTPUT
+          else
+            echo "playwright_tests=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Playwright tests
+        if: ${{ steps.bcpPlaywrightTests.outputs.playwright_tests == 'true' }}
+        run: |
+          yarn playwright install --with-deps chromium chrome
+          yarn playwright test
+
+      # Uploads every coverage file found in the workspace: the Jest output in
+      # coverage/ and, if the Playwright tests write one, e.g. coverage-e2e/lcov.info
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
