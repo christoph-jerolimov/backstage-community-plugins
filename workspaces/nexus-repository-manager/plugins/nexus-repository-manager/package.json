@@ -31,7 +31,8 @@
     "pluginId": "nexus-repository-manager",
     "pluginPackage": "@backstage-community/plugin-nexus-repository-manager",
     "pluginPackages": [
-      "@backstage-community/plugin-nexus-repository-manager"
+      "@backstage-community/plugin-nexus-repository-manager",
+      "@backstage-community/plugin-nexus-repository-manager-backend"
     ]
   },
   "sideEffects": false,

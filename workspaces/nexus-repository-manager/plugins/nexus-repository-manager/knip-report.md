@@ -4,5 +4,5 @@
 
 | Name                         | Location          | Severity |
 | :--------------------------- | :---------------- | :------- |
-| @backstage/filter-predicates | package.json:55:6 | error    |
+| @backstage/filter-predicates | package.json:56:6 | error    |
 
