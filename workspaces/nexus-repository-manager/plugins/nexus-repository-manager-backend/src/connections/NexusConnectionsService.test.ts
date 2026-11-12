@@ -20,7 +20,7 @@ import { nexusConnectionType } from './nexusConnectionType';
 function create(connections: unknown) {
   return DefaultNexusConnectionsService.create({
     config: mockServices.rootConfig({
-      data: { nexusRepositoryManager: { connections } } as any,
+      data: { connections } as any,
     }),
     logger: mockServices.logger.mock(),
   });
@@ -136,12 +136,18 @@ describe('DefaultNexusConnectionsService', () => {
   });
 
   it('rejects invalid configuration like the connections service', () => {
-    expect(() =>
-      create([{ host: 'a.com', auth: [{ method: 'none' }] }]),
-    ).toThrow('Unrecognised connection type undefined');
-    expect(() =>
-      create([{ type: 'github', host: 'a.com', auth: [{ method: 'none' }] }]),
-    ).toThrow('Unrecognised connection type github');
+    // Connections of other types belong to the Backstage connections service
+    expect(
+      create([
+        { host: 'a.com', auth: [] },
+        { type: 'github', host: 'github.com', auth: [{ method: 'app' }] },
+      ])
+        .forPlugin('nexus-repository-manager')
+        .getDefaultQuery(),
+    ).toBeUndefined();
+    expect(() => create({ type: 'nexus-repository-manager' })).toThrow(
+      'Expected "connections" config to be an array of connection objects',
+    );
     expect(() =>
       create([{ type: 'nexus-repository-manager', host: 'a.com', auth: [] }]),
     ).toThrow('must configure at least one auth method');
@@ -155,7 +161,7 @@ describe('DefaultNexusConnectionsService', () => {
         },
       ]),
     ).toThrow(
-      /Invalid connection of type "nexus-repository-manager" in nexusRepositoryManager.connections config:\n.*unknown/,
+      /Invalid connection of type "nexus-repository-manager" in connections config:\n.*unknown/,
     );
     expect(() =>
       create([

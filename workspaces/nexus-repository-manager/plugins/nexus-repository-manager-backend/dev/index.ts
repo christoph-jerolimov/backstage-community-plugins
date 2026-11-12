@@ -35,21 +35,21 @@ backend.add(
       },
       nexusRepositoryManager: {
         experimentalAnnotations: true,
-        connections: [
-          {
-            type: 'nexus-repository-manager',
-            host: process.env.NEXUS_HOST ?? 'localhost:8081',
-            ...(process.env.NEXUS_HOST
-              ? {}
-              : { baseUrl: 'http://localhost:8081' }),
-            auth: [
-              process.env.NEXUS_TOKEN
-                ? { method: 'token', token: process.env.NEXUS_TOKEN }
-                : { method: 'none' },
-            ],
-          },
-        ],
       },
+      connections: [
+        {
+          type: 'nexus-repository-manager',
+          host: process.env.NEXUS_HOST ?? 'localhost:8081',
+          ...(process.env.NEXUS_HOST
+            ? {}
+            : { baseUrl: 'http://localhost:8081' }),
+          auth: [
+            process.env.NEXUS_TOKEN
+              ? { method: 'token', token: process.env.NEXUS_TOKEN }
+              : { method: 'none' },
+          ],
+        },
+      ],
     },
   }),
 );

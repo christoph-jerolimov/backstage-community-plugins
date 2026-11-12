@@ -29,22 +29,28 @@ The plugin depends on the catalog plugin.
 
 ## Configuration
 
-Nexus Repository Manager instances are configured as connections, in the format of the Backstage [connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md). Each entry looks exactly like an entry of the root `connections` configuration, with the type `nexus-repository-manager`:
+Nexus Repository Manager instances are configured in the root `connections` configuration of the Backstage [connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md), with the type `nexus-repository-manager`. The plugin reads these entries and ignores connections of other types:
 
 ```yaml title="app-config.yaml"
-nexusRepositoryManager:
-  connections:
-    - type: nexus-repository-manager
-      title: Nexus Repository Manager
-      host: nexus.example.com
-      # Optional, defaults to https://<host>
-      baseUrl: https://nexus.example.com
-      auth:
-        - method: token
-          token: ${NEXUS_TOKEN}
+connections:
+  - type: nexus-repository-manager
+    title: Nexus Repository Manager
+    host: nexus.example.com
+    # Optional, defaults to https://<host>
+    baseUrl: https://nexus.example.com
+    auth:
+      - method: token
+        token: ${NEXUS_TOKEN}
+  # Connections of other types are used by Backstage itself
+  - type: github
+    host: github.com
+    auth:
+      - method: token
+        token: ${GITHUB_TOKEN}
 ```
 
-The entries live under `nexusRepositoryManager.connections` for now, because the Backstage connections service only accepts its built-in connection types and fails to start when the root `connections` configuration contains other types. Once custom connection types are supported, the entries can be moved to the root `connections` configuration as they are.
+> [!WARNING]
+> The Backstage connections service only knows its built-in connection types and rejects all others, including `nexus-repository-manager`. Backstage 1.54 doesn't use the service by default, but in newer releases the backend fails to start as soon as any installed plugin uses the connections service while a `nexus-repository-manager` connection is configured. Check your backend before upgrading Backstage.
 
 The supported auth methods are:
 
@@ -64,16 +70,15 @@ The connections are looked up the same way as by the connections service:
 For example, to give this plugin its own credentials for an instance that other plugins also use:
 
 ```yaml title="app-config.yaml"
-nexusRepositoryManager:
-  connections:
-    - type: nexus-repository-manager
-      host: nexus.example.com
-      auth:
-        - method: token
-          token: ${NEXUS_BACKSTAGE_TOKEN}
-          match:
-            plugins: [nexus-repository-manager]
-        - method: none
+connections:
+  - type: nexus-repository-manager
+    host: nexus.example.com
+    auth:
+      - method: token
+        token: ${NEXUS_BACKSTAGE_TOKEN}
+        match:
+          plugins: [nexus-repository-manager]
+      - method: none
 ```
 
 Set `nexusRepositoryManager.experimentalAnnotations` to `true` to also search with the experimental annotations, the same as in the frontend plugin.

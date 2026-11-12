@@ -20,30 +20,34 @@ export const NEXUS_URL = 'https://nexus.example.com';
 export const OTHER_NEXUS_URL = 'https://other-nexus.example.com:8443';
 
 export const testConfig = {
-  nexusRepositoryManager: {
-    connections: [
-      {
-        type: 'nexus-repository-manager',
-        title: 'Main Nexus',
-        host: 'nexus.example.com',
-        auth: [
-          // Only for another plugin, so it must not be used
-          {
-            method: 'basic',
-            username: 'catalog',
-            password: 'catalog-only',
-            match: { plugins: ['catalog'] },
-          },
-          { method: 'token', token: 'secret-token' },
-        ],
-      },
-      {
-        type: 'nexus-repository-manager',
-        host: 'other-nexus.example.com:8443',
-        auth: [{ method: 'basic', username: 'user', password: 'pass' }],
-      },
-    ],
-  },
+  connections: [
+    // Belongs to the Backstage connections service and is ignored
+    {
+      type: 'github',
+      host: 'github.com',
+      auth: [{ method: 'token', token: 'github-token' }],
+    },
+    {
+      type: 'nexus-repository-manager',
+      title: 'Main Nexus',
+      host: 'nexus.example.com',
+      auth: [
+        // Only for another plugin, so it must not be used
+        {
+          method: 'basic',
+          username: 'catalog',
+          password: 'catalog-only',
+          match: { plugins: ['catalog'] },
+        },
+        { method: 'token', token: 'secret-token' },
+      ],
+    },
+    {
+      type: 'nexus-repository-manager',
+      host: 'other-nexus.example.com:8443',
+      auth: [{ method: 'basic', username: 'user', password: 'pass' }],
+    },
+  ],
 };
 
 export const testEntities: Entity[] = [

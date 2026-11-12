@@ -31,16 +31,10 @@ import {
 } from './nexusConnectionType';
 
 /**
- * The config key that holds the Nexus Repository Manager connections.
- *
- * @remarks
- *
- * The entries use the same format as the Backstage `connections` config. They
- * can't live there yet, because the connections service only accepts its
- * built-in connection types and fails to start on unknown ones.
+ * The root config key of the Backstage connections, which also holds the
+ * Nexus Repository Manager connections.
  */
-export const NEXUS_CONNECTIONS_CONFIG_KEY =
-  'nexusRepositoryManager.connections';
+const CONNECTIONS_CONFIG_KEY = 'connections';
 
 type NexusConfiguredConnection = ConfiguredConnection<
   typeof nexusConnectionType
@@ -137,20 +131,25 @@ function validateConnection(connection: JsonObject): NexusConfiguredConnection {
 function buildConnectionsFromConfig(
   config: Config,
 ): NexusConfiguredConnection[] {
-  const raw = config.getOptional(NEXUS_CONNECTIONS_CONFIG_KEY);
+  const raw = config.getOptional(CONNECTIONS_CONFIG_KEY);
   if (raw !== undefined && !Array.isArray(raw)) {
     throw new InputError(
-      `Expected "${NEXUS_CONNECTIONS_CONFIG_KEY}" config to be an array of connection objects`,
+      `Expected "${CONNECTIONS_CONFIG_KEY}" config to be an array of connection objects`,
     );
   }
 
-  const connections = ((raw as JsonObject[] | undefined) ?? []).map(v => {
+  // Connections of other types belong to the Backstage connections service.
+  const nexusEntries = ((raw as JsonObject[] | undefined) ?? []).filter(
+    v => v.type === nexusConnectionType.type,
+  );
+
+  const connections = nexusEntries.map(v => {
     try {
       return validateConnection(v);
     } catch (e) {
       const type = typeof v.type === 'string' ? v.type : 'unknown';
       throw new InputError(
-        `Invalid connection of type "${type}" in ${NEXUS_CONNECTIONS_CONFIG_KEY} config:\n${describeError(
+        `Invalid connection of type "${type}" in ${CONNECTIONS_CONFIG_KEY} config:\n${describeError(
           e,
         )}`,
       );
