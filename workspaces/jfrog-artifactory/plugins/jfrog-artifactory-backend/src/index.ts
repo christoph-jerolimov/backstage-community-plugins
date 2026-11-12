@@ -23,16 +23,17 @@
 
 export { jfrogArtifactoryPlugin as default } from './plugin';
 export {
-  jfrogArtifactoryConnectionType,
-  type JfrogArtifactoryAuth,
+  JfrogArtifactoryConnectionType,
   type JfrogArtifactoryAuthByMethod,
   type JfrogArtifactoryAuthMethod,
   type JfrogArtifactoryConnection,
   type JfrogArtifactoryConnectionTypeDefinition,
 } from './connections/jfrogArtifactoryConnectionType';
 export {
-  JfrogArtifactoryConnections,
+  DefaultJfrogArtifactoryConnectionsService,
+  JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY,
+  PluginJfrogArtifactoryConnectionsService,
   type JfrogArtifactoryConnectionsService,
-} from './connections/JfrogArtifactoryConnections';
+} from './connections/JfrogArtifactoryConnectionsService';
 export type { EntityTagsResult } from './service/JfrogArtifactoryService';
 export * from './types';

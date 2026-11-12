@@ -23,7 +23,8 @@ import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 //
 //   jfrogArtifactory:
 //     connections:
-//       - host: mycompany.jfrog.io
+//       - type: jfrog-artifactory
+//         host: mycompany.jfrog.io
 //         auth:
 //           - method: token
 //             token: ${JFROG_TOKEN}

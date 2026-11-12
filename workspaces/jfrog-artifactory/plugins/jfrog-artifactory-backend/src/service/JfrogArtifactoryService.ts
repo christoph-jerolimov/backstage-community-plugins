@@ -28,8 +28,8 @@ import { CatalogService } from '@backstage/plugin-catalog-node';
 import {
   getConnectionAuthHeaders,
   getConnectionBaseUrl,
-  JfrogArtifactoryConnectionsService,
-} from '../connections/JfrogArtifactoryConnections';
+  PluginJfrogArtifactoryConnectionsService,
+} from '../connections/JfrogArtifactoryConnectionsService';
 import {
   JfrogArtifactoryTagEdge,
   JFROG_ARTIFACTORY_ANNOTATION_HOST,
@@ -69,7 +69,7 @@ export class JfrogArtifactoryService {
       config: RootConfigService;
       logger: LoggerService;
       catalog: CatalogService;
-      connections: JfrogArtifactoryConnectionsService;
+      connections: PluginJfrogArtifactoryConnectionsService;
     },
   ) {}
 
@@ -111,34 +111,33 @@ export class JfrogArtifactoryService {
       );
     }
 
-    const host =
-      annotations[JFROG_ARTIFACTORY_ANNOTATION_HOST] ??
-      this.options.connections.getDefaultHost();
-    if (!host) {
+    const hostAnnotation = annotations[JFROG_ARTIFACTORY_ANNOTATION_HOST];
+    const url = hostAnnotation
+      ? toUrl(hostAnnotation)
+      : this.options.connections.getDefaultUrl();
+    if (!url) {
       throw new NotFoundError(
         'No JFrog Artifactory connection is configured in jfrogArtifactory.connections',
       );
     }
+    const host = new URL(url).host;
 
     const repoFilter =
       annotations[JFROG_ARTIFACTORY_ANNOTATION_REPO_FILTER] ??
       this.options.config.getOptionalString('jfrogArtifactory.repoFilter');
 
-    const tags = await this.getTags({ host, imageName, repoFilter });
+    const tags = await this.getTags({ url, imageName, repoFilter });
     return { entityRef, imageName, host, repoFilter, tags };
   }
 
   private async getTags(options: {
-    host: string;
+    url: string;
     imageName: string;
     repoFilter?: string;
   }): Promise<JfrogArtifactoryTagsResponse> {
     const connection = await this.options.connections.find({
-      query: {
-        url: options.host.includes('://')
-          ? options.host
-          : `https://${options.host}`,
-      },
+      type: 'jfrog-artifactory',
+      query: { url: options.url },
       authMethods: ['token', 'basic', 'none'],
     });
     const url = `${getConnectionBaseUrl(connection)}/metadata/api/v1/query`;
@@ -220,6 +219,17 @@ export class JfrogArtifactoryService {
     return (
       this.options.config.getOptionalNumber('jfrogArtifactory.pageLimit') ??
       DEFAULT_PAGE_LIMIT
+    );
+  }
+}
+
+function toUrl(hostOrUrl: string): string {
+  const url = hostOrUrl.includes('://') ? hostOrUrl : `https://${hostOrUrl}`;
+  try {
+    return new URL(url).toString();
+  } catch {
+    throw new InputError(
+      `Invalid "${JFROG_ARTIFACTORY_ANNOTATION_HOST}" annotation "${hostOrUrl}"`,
     );
   }
 }

@@ -114,10 +114,12 @@ const config = {
     pageLimit: 50,
     connections: [
       {
+        type: 'jfrog-artifactory',
         host: 'acme.jfrog.io',
         auth: [{ method: 'token', token: 'acme-token' }],
       },
       {
+        type: 'jfrog-artifactory',
         host: 'artifactory.example.com',
         auth: [{ method: 'basic', username: 'user', password: 'pass' }],
       },

@@ -19,19 +19,23 @@ backend.add(import('@backstage-community/plugin-jfrog-artifactory-backend'));
 
 ## Configuration
 
-Connections use the same format as the Backstage `connections` configuration: a `host`, an optional `title`, and a list of `auth` methods. The first auth method in the list is used.
+JFrog Artifactory connections use the format of the [Backstage connections config](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md): each entry has a `type`, an optional `title`, the connection fields, and a list of `auth` methods.
+
+The connections live under `jfrogArtifactory.connections` and not under the top-level `connections` key. The Backstage connections service only accepts its built-in connection types, and JFrog Artifactory is not one of them yet, so an entry there would fail at startup. Once a `jfrog-artifactory` connection type exists in Backstage, the entries can be moved to the top-level `connections` list as they are.
 
 ```yaml title="app-config.yaml"
 jfrogArtifactory:
   connections:
-    - host: mycompany.jfrog.io
+    - type: jfrog-artifactory
+      host: mycompany.jfrog.io
       auth:
         - method: token
           token: ${JFROG_ARTIFACTORY_TOKEN}
-    - host: artifactory.example.com:8082
+    - type: jfrog-artifactory
+      title: Internal Artifactory
+      host: artifactory.example.com:8082
       # Optional, defaults to https://<host>
       baseUrl: http://artifactory.example.com:8082
-      title: Internal Artifactory
       auth:
         - method: basic
           username: ${JFROG_USERNAME}
@@ -54,6 +58,8 @@ Supported auth methods:
 | `basic` | `username`, `password` | Basic authentication                           |
 | `none`  |                        | Anonymous access                               |
 
+Like in the connections config, a connection and each auth entry can have a `match` block that restricts it to specific plugins, for example `match: { plugins: [jfrog-artifactory] }`. Auth entries that match the plugin are preferred, otherwise the first entry is used.
+
 ## Entity annotations
 
 ```yaml title="catalog-info.yaml"
@@ -63,7 +69,8 @@ metadata:
     jfrog-artifactory/image-name: 'my-image'
     # Optional: only search repositories matching this pattern
     jfrog-artifactory/repo-filter: '*-prod-federated'
-    # Optional: the host of the connection to use, defaults to the first configured connection
+    # Optional: the host of the connection to use (as in its `host` field),
+    # defaults to the first configured connection
     jfrog-artifactory/host: 'artifactory.example.com:8082'
 ```
 

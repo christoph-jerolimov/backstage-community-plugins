@@ -4,8 +4,25 @@
 
 ```ts
 import { BackendFeature } from '@backstage/backend-plugin-api';
-import { Config } from '@backstage/config';
-import type { ConnectionTypeDefinition } from '@backstage/connections';
+import { ConnectionTypeDefinition } from '@backstage/connections';
+import { LoggerService } from '@backstage/backend-plugin-api';
+import { RootConfigService } from '@backstage/backend-plugin-api';
+
+// @public
+export class DefaultJfrogArtifactoryConnectionsService {
+  // (undocumented)
+  static create(options: {
+    logger: LoggerService;
+    config: RootConfigService;
+  }): DefaultJfrogArtifactoryConnectionsService;
+  // (undocumented)
+  forPlugin(
+    pluginId: string,
+    options?: {
+      logger: LoggerService;
+    },
+  ): PluginJfrogArtifactoryConnectionsService;
+}
 
 // @public
 export interface EntityTagsResult {
@@ -33,27 +50,31 @@ export const JFROG_ARTIFACTORY_ANNOTATION_REPO_FILTER =
   'jfrog-artifactory/repo-filter';
 
 // @public
-export type JfrogArtifactoryAuth =
-  JfrogArtifactoryAuthByMethod[JfrogArtifactoryAuthMethod];
+export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY =
+  'jfrogArtifactory.connections';
 
 // @public
 export type JfrogArtifactoryAuthByMethod = {
   none: {
     method: 'none';
+    title: string;
   };
   token: {
     method: 'token';
+    title: string;
     token: string;
   };
   basic: {
     method: 'basic';
+    title: string;
     username: string;
     password: string;
   };
 };
 
 // @public
-export type JfrogArtifactoryAuthMethod = keyof JfrogArtifactoryAuthByMethod;
+export type JfrogArtifactoryAuthMethod =
+  JfrogArtifactoryConnectionTypeDefinition['authMethods'][number]['method'];
 
 // @public
 export type JfrogArtifactoryConnection<
@@ -63,57 +84,59 @@ export type JfrogArtifactoryConnection<
   title: string;
   host: string;
   baseUrl?: string;
-  auth: JfrogArtifactoryAuthByMethod[TAuthMethod] & {
-    title: string;
-  };
+  auth: JfrogArtifactoryAuthByMethod[TAuthMethod];
 };
 
 // @public
-export class JfrogArtifactoryConnections
-  implements JfrogArtifactoryConnectionsService
-{
-  // (undocumented)
-  find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
-    query: {
-      url: string;
-    };
-    authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
-  }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
-  // (undocumented)
-  static fromConfig(config: Config): JfrogArtifactoryConnections;
-  // (undocumented)
-  getDefaultHost(): string | undefined;
-}
-
-// @public
 export interface JfrogArtifactoryConnectionsService {
+  // (undocumented)
   find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
+    type: 'jfrog-artifactory';
     query: {
       url: string;
     };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
-  getDefaultHost(): string | undefined;
+  // (undocumented)
+  find(options: {
+    type: 'jfrog-artifactory';
+    query: {
+      url: string;
+    };
+  }): Promise<Omit<JfrogArtifactoryConnection, 'auth'>>;
 }
 
 // @public
-export const jfrogArtifactoryConnectionType: JfrogArtifactoryConnectionTypeDefinition;
+export const JfrogArtifactoryConnectionType: ConnectionTypeDefinition<{
+  type: 'jfrog-artifactory';
+  cardinality: 'multiton';
+  lookupStrategy: 'host';
+  query: {
+    url: string;
+  };
+  configSchema: {
+    host: string;
+    baseUrl?: string | undefined;
+  };
+  auth: readonly (
+    | {
+        method: 'none';
+      }
+    | {
+        method: 'token';
+        token: string;
+      }
+    | {
+        method: 'basic';
+        username: string;
+        password: string;
+      }
+  )[];
+}>;
 
 // @public
 export type JfrogArtifactoryConnectionTypeDefinition =
-  ConnectionTypeDefinition<{
-    type: 'jfrog-artifactory';
-    cardinality: 'multiton';
-    lookupStrategy: 'host';
-    query: {
-      url: string;
-    };
-    configSchema: {
-      host: string;
-      baseUrl?: string;
-    };
-    auth: readonly JfrogArtifactoryAuth[];
-  }>;
+  typeof JfrogArtifactoryConnectionType;
 
 // @public (undocumented)
 export interface JfrogArtifactoryPageInfo {
@@ -219,5 +242,27 @@ export interface JfrogArtifactoryVulnerabilities {
   skipped: number;
   // (undocumented)
   unknown: number;
+}
+
+// @public
+export class PluginJfrogArtifactoryConnectionsService
+  implements JfrogArtifactoryConnectionsService
+{
+  // (undocumented)
+  find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
+    type: 'jfrog-artifactory';
+    query: {
+      url: string;
+    };
+    authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
+  }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
+  // (undocumented)
+  find(options: {
+    type: 'jfrog-artifactory';
+    query: {
+      url: string;
+    };
+  }): Promise<Omit<JfrogArtifactoryConnection, 'auth'>>;
+  getDefaultUrl(): string | undefined;
 }
 ```

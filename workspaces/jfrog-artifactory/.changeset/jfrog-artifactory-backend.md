@@ -2,4 +2,4 @@
 '@backstage-community/plugin-jfrog-artifactory-backend': minor
 ---
 
-Added a new JFrog Artifactory backend plugin. It loads the image tags of a catalog entity through an API endpoint and through a `get-image-tags` action in the actions registry. JFrog Artifactory hosts and credentials are configured under `jfrogArtifactory.connections`, using the Backstage connections configuration format.
+Added a new JFrog Artifactory backend plugin. It loads the image tags of a catalog entity through an API endpoint and through a `get-image-tags` action in the actions registry. JFrog Artifactory instances and credentials are configured under `jfrogArtifactory.connections`, using the format of the Backstage connections config.

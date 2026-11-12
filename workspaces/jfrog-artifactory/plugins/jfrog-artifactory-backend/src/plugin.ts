@@ -20,7 +20,7 @@ import {
 import { actionsRegistryServiceRef } from '@backstage/backend-plugin-api/alpha';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 import { createGetImageTagsAction } from './actions/createGetImageTagsAction';
-import { JfrogArtifactoryConnections } from './connections/JfrogArtifactoryConnections';
+import { DefaultJfrogArtifactoryConnectionsService } from './connections/JfrogArtifactoryConnectionsService';
 import { createRouter } from './router';
 import { JfrogArtifactoryService } from './service/JfrogArtifactoryService';
 
@@ -53,7 +53,10 @@ export const jfrogArtifactoryPlugin = createBackendPlugin({
           config,
           logger,
           catalog,
-          connections: JfrogArtifactoryConnections.fromConfig(config),
+          connections: DefaultJfrogArtifactoryConnectionsService.create({
+            config,
+            logger,
+          }).forPlugin('jfrog-artifactory', { logger }),
         });
 
         httpRouter.use(await createRouter({ httpAuth, jfrogArtifactory }));

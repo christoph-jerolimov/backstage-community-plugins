@@ -13,95 +13,80 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type {
-  ConnectionTypeDefinition,
-  PortableSchema,
-} from '@backstage/connections';
-import { InputError } from '@backstage/errors';
-import { JsonObject } from '@backstage/types';
-import { z } from 'zod';
-
-function createPortableSchema<TOutput>(
-  schema: z.ZodType<TOutput>,
-  errorMessage: string,
-): PortableSchema<TOutput, unknown> {
-  let cachedJsonSchema: JsonObject | undefined;
-  return {
-    parse(input) {
-      const result = schema.safeParse(input);
-      if (!result.success) {
-        throw new InputError(
-          `${errorMessage}: ${z.prettifyError(result.error)}`,
-        );
-      }
-      return result.data;
-    },
-    schema() {
-      cachedJsonSchema ??= z.toJSONSchema(schema, {
-        target: 'draft-07',
-        io: 'input',
-      }) as JsonObject;
-      return { schema: structuredClone(cachedJsonSchema) };
-    },
-  };
-}
+import { z } from 'zod/v4';
+import { createConnectionType } from './createConnectionType';
 
 /**
- * The auth entries supported by JFrog Artifactory connections, by method.
+ * The JFrog Artifactory connection type, defined the same way as the
+ * connection types that ship with `@backstage/connections`.
  *
  * @public
  */
-export type JfrogArtifactoryAuthByMethod = {
-  none: { method: 'none' };
-  token: { method: 'token'; token: string };
-  basic: { method: 'basic'; username: string; password: string };
-};
+export const JfrogArtifactoryConnectionType = createConnectionType({
+  type: 'jfrog-artifactory',
+  title: 'JFrog Artifactory',
+  configSchema: z.object({
+    host: z.string(),
+    baseUrl: z.string().optional(),
+  }),
+  authMethods: [
+    {
+      method: 'none',
+      title: 'None',
+      configSchema: z.object({}),
+    },
+    {
+      method: 'token',
+      title: 'Token',
+      configSchema: z.object({
+        token: z.string(),
+      }),
+    },
+    {
+      method: 'basic',
+      title: 'Basic',
+      configSchema: z.object({
+        username: z.string(),
+        password: z.string(),
+      }),
+    },
+  ],
+});
+
+/**
+ * The type definition of the JFrog Artifactory connection type.
+ *
+ * @public
+ */
+export type JfrogArtifactoryConnectionTypeDefinition =
+  typeof JfrogArtifactoryConnectionType;
 
 /**
  * The auth methods supported by JFrog Artifactory connections.
  *
  * @public
  */
-export type JfrogArtifactoryAuthMethod = keyof JfrogArtifactoryAuthByMethod;
+export type JfrogArtifactoryAuthMethod =
+  JfrogArtifactoryConnectionTypeDefinition['authMethods'][number]['method'];
 
 /**
- * An auth entry of a JFrog Artifactory connection.
+ * The auth entries of JFrog Artifactory connections, by method.
  *
  * @public
  */
-export type JfrogArtifactoryAuth =
-  JfrogArtifactoryAuthByMethod[JfrogArtifactoryAuthMethod];
+export type JfrogArtifactoryAuthByMethod = {
+  none: { method: 'none'; title: string };
+  token: { method: 'token'; title: string; token: string };
+  basic: { method: 'basic'; title: string; username: string; password: string };
+};
 
 /**
- * Definition of the JFrog Artifactory connection type.
+ * A JFrog Artifactory connection, as returned by `find`.
  *
  * @remarks
  *
- * This follows the shape of the connection types that ship with
- * `@backstage/connections`, so that configuration can move to the
- * framework-level `connections` config once a JFrog Artifactory connection
- * type is available there.
- *
- * @public
- */
-export type JfrogArtifactoryConnectionTypeDefinition =
-  ConnectionTypeDefinition<{
-    type: 'jfrog-artifactory';
-    cardinality: 'multiton';
-    lookupStrategy: 'host';
-    query: { url: string };
-    configSchema: { host: string; baseUrl?: string };
-    auth: readonly JfrogArtifactoryAuth[];
-  }>;
-
-/**
- * A resolved JFrog Artifactory connection, with a single auth entry.
- *
- * @remarks
- *
- * This has the same shape as the `Connection` type of `@backstage/connections`
- * for its built-in connection types. It is declared explicitly because
- * `Connection` can only resolve the auth types of built-in connection types.
+ * This has the same shape as `Connection<'jfrog-artifactory', TAuthMethod>`
+ * would have if the type was part of `@backstage/connections`.
  *
  * @public
  */
@@ -112,56 +97,5 @@ export type JfrogArtifactoryConnection<
   title: string;
   host: string;
   baseUrl?: string;
-  auth: JfrogArtifactoryAuthByMethod[TAuthMethod] & { title: string };
+  auth: JfrogArtifactoryAuthByMethod[TAuthMethod];
 };
-
-/**
- * The JFrog Artifactory connection type.
- *
- * @public
- */
-export const jfrogArtifactoryConnectionType: JfrogArtifactoryConnectionTypeDefinition =
-  {
-    type: 'jfrog-artifactory',
-    title: 'JFrog Artifactory',
-    cardinality: 'multiton',
-    lookupStrategy: 'host',
-    configSchema: createPortableSchema(
-      z
-        .object({
-          host: z.string().min(1),
-          baseUrl: z.url().optional(),
-        })
-        .strict(),
-      'Invalid configuration for connection type "jfrog-artifactory"',
-    ),
-    authMethods: [
-      {
-        method: 'none',
-        title: 'No authentication',
-        configSchema: createPortableSchema(
-          z.object({}),
-          'Invalid configuration for auth method "none" of connection type "jfrog-artifactory"',
-        ),
-      },
-      {
-        method: 'token',
-        title: 'Access token',
-        configSchema: createPortableSchema(
-          z.object({ token: z.string().min(1) }),
-          'Invalid configuration for auth method "token" of connection type "jfrog-artifactory"',
-        ),
-      },
-      {
-        method: 'basic',
-        title: 'Username and password',
-        configSchema: createPortableSchema(
-          z.object({
-            username: z.string().min(1),
-            password: z.string().min(1),
-          }),
-          'Invalid configuration for auth method "basic" of connection type "jfrog-artifactory"',
-        ),
-      },
-    ],
-  };
