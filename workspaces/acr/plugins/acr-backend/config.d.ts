@@ -16,21 +16,15 @@
 export interface Config {
   acr?: {
     /**
-     * Azure Container Registry connections, in the same format as the
-     * top-level `connections` configuration of the Backstage connections
-     * service. The first connection is used for entities without a
+     * Azure Container Registry connections, in the same format as the root
+     * `connections` configuration of the Backstage connections service. The
+     * first connection is used for entities without a
      * `azure-container-registry/registry-name` annotation.
      */
     connections?: Array<{
-      /** Must be `acr`. */
-      type: 'acr';
+      type: 'azure-container-registry';
       /** The registry host, for example `myregistry.azurecr.io`. */
       host: string;
-      /**
-       * Optional short name that is matched against the
-       * `azure-container-registry/registry-name` entity annotation.
-       */
-      name?: string;
       /** Defaults to `https://<host>/acr/v1`. */
       apiBaseUrl?: string;
       title?: string;

@@ -14,8 +14,9 @@ Entities are annotated the same way as for the
 metadata:
   annotations:
     azure-container-registry/repository-name: 'team/my-image'
-    # Optional, selects one of the configured connections by `name` or `host`
-    azure-container-registry/registry-name: 'other-registry'
+    # Optional, selects the registry: `otherregistry` means otherregistry.azurecr.io,
+    # a value with a dot is used as the full host
+    azure-container-registry/registry-name: 'otherregistry'
 ```
 
 ## Installation
@@ -35,25 +36,25 @@ backend.add(import('@backstage-community/plugin-acr-backend'));
 
 ## Configuration
 
-Registries and their credentials are configured as connections. The format is
-the same as the top-level `connections` configuration of the
-[Backstage connections service](https://backstage.io/docs/next/backend-system/core-services/connections/configuring-connections).
-The core connections service only accepts its built-in connection types, so
-for now the ACR connections are read from `acr.connections`:
+Registries and their credentials are configured as connections of type
+`azure-container-registry`. Each entry uses the same format as the root
+`connections` configuration of the
+[Backstage connections service](https://backstage.io/docs/next/backend-system/core-services/connections/configuring-connections)
+(BEP-14): a `type`, the connection fields, an optional `title` and `match`, and
+an `auth` array with one or more auth entries.
 
 ```yaml
 acr:
   connections:
-    - type: acr
+    - type: azure-container-registry
       host: myregistry.azurecr.io
       auth:
         - method: basic
           username: ${ACR_USERNAME}
           password: ${ACR_PASSWORD}
-    - type: acr
+    - type: azure-container-registry
+      title: Other registry
       host: otherregistry.azurecr.io
-      # Optional, matched against the `azure-container-registry/registry-name` annotation
-      name: other-registry
       # Optional, defaults to https://<host>/acr/v1
       # apiBaseUrl: https://otherregistry.azurecr.io/acr/v1
       auth:
@@ -61,7 +62,23 @@ acr:
           token: ${ACR_TOKEN}
 ```
 
-The supported auth methods are:
+> **Why `acr.connections` and not the root `connections`?** The connections
+> service only accepts built-in connection types, and plugins can't add their
+> own yet (see
+> [Create or modify a connection type](https://backstage.io/docs/next/backend-system/core-services/connections/creating-a-connection-type)).
+> Unknown types in the root `connections` array fail backend startup as soon
+> as any plugin uses the connections service. Once an
+> `azure-container-registry` type is built in, the entries can be moved to the
+> root `connections` array without changes.
+
+Connection fields:
+
+| Field        | Required | Description                                                     |
+| ------------ | -------- | --------------------------------------------------------------- |
+| `host`       | Yes      | The registry host, for example `myregistry.azurecr.io`.         |
+| `apiBaseUrl` | No       | The ACR REST API base URL, defaults to `https://<host>/acr/v1`. |
+
+Auth methods:
 
 | Method  | Fields                 | Header sent to ACR                         |
 | ------- | ---------------------- | ------------------------------------------ |
@@ -69,12 +86,16 @@ The supported auth methods are:
 | `token` | `token`                | `Authorization: Bearer <token>`            |
 | `basic` | `username`, `password` | `Authorization: Basic <username:password>` |
 
-As with the connections service, `title` and `match.plugins` can be set on a
-connection and on each auth entry.
+The lookup follows the connections service: the connection is selected by the
+registry host, and the first auth entry visible to the `acr` plugin is used.
+Auth entries with `match.plugins: [acr]` are preferred over entries without a
+`match`, and connections or auth entries that `match` other plugins are
+ignored. Default titles, validation, and error messages are the same as for
+the built-in connection types.
 
 Entities without a `azure-container-registry/registry-name` annotation use the
-first connection. Otherwise, the annotation value is matched against the
-connection `name`, the `host`, and then `<value>.azurecr.io`.
+first connection. Otherwise the annotation selects the host: `myregistry`
+becomes `myregistry.azurecr.io`, and a value with a dot is used as the host.
 
 ## HTTP API
 

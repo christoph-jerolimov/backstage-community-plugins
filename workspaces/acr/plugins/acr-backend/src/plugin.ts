@@ -36,6 +36,7 @@ export const acrPlugin = createBackendPlugin({
       deps: {
         config: coreServices.rootConfig,
         logger: coreServices.logger,
+        pluginMetadata: coreServices.pluginMetadata,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         catalog: catalogServiceRef,
@@ -44,16 +45,24 @@ export const acrPlugin = createBackendPlugin({
       async init({
         config,
         logger,
+        pluginMetadata,
         httpAuth,
         httpRouter,
         catalog,
         actionsRegistry,
       }) {
-        const connections = DefaultAcrConnectionsService.create({
+        const acrConnections = DefaultAcrConnectionsService.create({
           config,
           logger,
         });
-        const images = new AcrImagesService({ catalog, connections, logger });
+        const images = new AcrImagesService({
+          catalog,
+          connections: acrConnections.forPlugin(pluginMetadata.getId(), {
+            logger,
+          }),
+          defaultRegistryUrl: acrConnections.getDefaultUrl(),
+          logger,
+        });
 
         createGetImageTagsAction({ actionsRegistry, images });
         httpRouter.use(await createRouter({ httpAuth, images }));

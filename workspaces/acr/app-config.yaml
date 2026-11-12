@@ -56,11 +56,11 @@ proxy:
       secure: true
 
 # Connections for the ACR backend plugin (@backstage-community/plugin-acr-backend).
-# Uses the same format as the top-level `connections` config of the Backstage
+# Uses the same format as the root `connections` config of the Backstage
 # connections service. Uncomment and configure in app-config.local.yaml.
 # acr:
 #   connections:
-#     - type: acr
+#     - type: azure-container-registry
 #       host: ${ACR_HOST}
 #       auth:
 #         - method: basic

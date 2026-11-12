@@ -17,259 +17,304 @@ import type {
   LoggerService,
   RootConfigService,
 } from '@backstage/backend-plugin-api';
-import { InputError, NotAllowedError, NotFoundError } from '@backstage/errors';
-import type { JsonObject } from '@backstage/types';
+import type { ConfiguredConnection } from '@backstage/connections/config';
 import {
+  InputError,
+  NotAllowedError,
+  NotFoundError,
+  toError,
+} from '@backstage/errors';
+import { z } from 'zod/v4';
+import {
+  ACR_CONNECTION_TYPE,
   AcrConnection,
   AcrConnectionAuthMethod,
+  AcrConnectionTypeDefinition,
   acrConnectionType,
 } from './acrConnectionType';
 
-const CONFIG_KEY = 'acr.connections';
+/**
+ * The configuration key that holds the Azure Container Registry connections.
+ *
+ * The entries use the same format as the root `connections` configuration of
+ * the Backstage connections service. They can't be placed there yet, because
+ * the core service rejects connection types that aren't built in.
+ */
+export const ACR_CONNECTIONS_CONFIG_KEY = 'acr.connections';
 
-type ConfiguredAuth = AcrConnection['auth'] & {
-  match?: { plugins: string[] };
-};
-
-type ConfiguredConnection = Omit<AcrConnection, 'auth'> & {
-  match?: { plugins: string[] };
-  auth: ConfiguredAuth[];
-};
+type AcrConfiguredConnection =
+  ConfiguredConnection<AcrConnectionTypeDefinition>;
 
 /**
- * Looks up Azure Container Registry connections.
- *
- * @remarks
- *
- * Mirrors the `find` method of the `ConnectionsService` from
- * `@backstage/connections`, so that it can be replaced by the core service
- * once it supports connection types that are provided by plugins.
- *
- * @public
+ * A plugin-scoped lookup of Azure Container Registry connections, with the
+ * same `find` contract as the `ConnectionsService` of `@backstage/connections`.
  */
 export interface AcrConnectionsService {
-  /**
-   * Finds the connection for the registry host of the given URL, including
-   * the first auth method that is available to this plugin.
-   */
   find<TAuthMethod extends AcrConnectionAuthMethod>(options: {
-    type: 'acr';
+    type: typeof ACR_CONNECTION_TYPE;
     query: { url: string };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<AcrConnection<TAuthMethod>>;
-  /**
-   * Finds the connection for the registry host of the given URL, without
-   * any auth information.
-   */
   find(options: {
-    type: 'acr';
+    type: typeof ACR_CONNECTION_TYPE;
     query: { url: string };
   }): Promise<Omit<AcrConnection, 'auth'>>;
-
-  /**
-   * Lists all connections that are available to this plugin, without any
-   * auth information. The first connection is the default connection.
-   */
-  list(): Promise<Omit<AcrConnection, 'auth'>[]>;
 }
 
-function asObject(value: unknown, what: string): JsonObject {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new InputError(`Expected ${what} to be an object`);
+// Mirrors describeError in @backstage/connections/config
+function describeError(error: unknown): string {
+  const e = toError(error);
+  if (e.name === 'ZodError') {
+    return z.prettifyError(e as unknown as z.ZodError);
   }
-  return value as JsonObject;
+  if (e.cause !== undefined) {
+    const cause = toError(e.cause);
+    if (cause.name === 'ZodError') {
+      return z.prettifyError(cause as unknown as z.ZodError);
+    }
+  }
+  return e.message;
 }
 
-function parseMatch(value: unknown, what: string) {
-  if (value === undefined) {
+function validateMatch(match: unknown) {
+  if (match === undefined) {
     return undefined;
   }
-  const { plugins } = asObject(value, `"match" of ${what}`);
-  if (
-    !Array.isArray(plugins) ||
-    !plugins.every(plugin => typeof plugin === 'string')
-  ) {
-    throw new InputError(
-      `Expected "match.plugins" of ${what} to be an array of strings`,
-    );
+  const plugins = (match as { plugins?: unknown } | null)?.plugins;
+  if (!Array.isArray(plugins) || !plugins.every(p => typeof p === 'string')) {
+    throw new InputError('Expected "match.plugins" to be an array of strings');
   }
   return { plugins: plugins as string[] };
 }
 
-function parseConnection(raw: unknown, index: number): ConfiguredConnection {
-  const what = `${CONFIG_KEY}[${index}]`;
-  const {
-    type,
-    title,
-    match,
-    auth: rawAuth,
-    ...configFields
-  } = asObject(raw, what);
-
-  if (type !== acrConnectionType.type) {
+// Mirrors validateConnection in @backstage/connections/config
+function validateConnection(
+  connection: Record<string, unknown>,
+): AcrConnectionsConfigEntry {
+  if (connection.type !== ACR_CONNECTION_TYPE) {
     throw new InputError(
-      `Unrecognised connection type ${JSON.stringify(
-        type,
-      )} in ${what}, expected "${acrConnectionType.type}"`,
+      `Unrecognised connection type ${connection.type}, expected "${ACR_CONNECTION_TYPE}"`,
     );
   }
-  if (title !== undefined && typeof title !== 'string') {
-    throw new InputError(`Expected "title" of ${what} to be a string`);
-  }
+  const rawAuth = connection.auth;
   if (!Array.isArray(rawAuth) || rawAuth.length === 0) {
     throw new InputError(
-      `Connection ${what} must configure at least one auth method`,
+      `Connection of type "${ACR_CONNECTION_TYPE}" must configure at least one auth method`,
     );
   }
-
-  const config = acrConnectionType.configSchema.parse(configFields);
-
-  const auth = rawAuth.map((rawEntry, authIndex) => {
-    const authWhat = `${what}.auth[${authIndex}]`;
-    const {
-      method,
-      title: authTitle,
-      match: authMatch,
-      ...rest
-    } = asObject(rawEntry, authWhat);
-    const authMethod = acrConnectionType.authMethods.find(
-      am => am.method === method,
-    );
-    if (!authMethod) {
+  const auth = rawAuth.map((entry: Record<string, unknown>) => {
+    if (typeof entry?.method !== 'string') {
       throw new InputError(
-        `Unknown auth method ${JSON.stringify(method)} in ${authWhat}`,
+        `Auth entry for connection type "${ACR_CONNECTION_TYPE}" is missing a "method" field`,
       );
     }
-    if (authTitle !== undefined && typeof authTitle !== 'string') {
-      throw new InputError(`Expected "title" of ${authWhat} to be a string`);
+    const definition = acrConnectionType.authMethods.find(
+      am => am.method === entry.method,
+    );
+    if (!definition) {
+      throw new InputError(
+        `Unknown auth method "${entry.method}" for connection type "${ACR_CONNECTION_TYPE}"`,
+      );
     }
+    const { method, title, match, ...rest } = entry;
     return {
-      ...authMethod.configSchema.parse(rest),
-      method: authMethod.method,
-      title: authTitle ?? authMethod.title,
-      match: parseMatch(authMatch, authWhat),
-    } as ConfiguredAuth;
+      ...definition.configSchema.parse(rest),
+      method,
+      title: (title as string | undefined) ?? definition.title,
+      match: validateMatch(match),
+    };
   });
-
+  const {
+    type: _type,
+    auth: _auth,
+    title,
+    match,
+    ...configFields
+  } = connection;
   return {
-    ...config,
-    type: acrConnectionType.type,
-    title: title ?? `${acrConnectionType.title} (${config.host})`,
-    match: parseMatch(match, what),
+    ...acrConnectionType.configSchema.parse(configFields),
+    type: ACR_CONNECTION_TYPE,
+    title: title as string | undefined,
+    match: validateMatch(match),
     auth,
-  };
+  } as AcrConnectionsConfigEntry;
 }
 
-function hostFromUrl(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    throw new InputError(`Invalid url "${url}" passed to find`);
-  }
-}
-
-function withoutAuth(
-  connection: ConfiguredConnection,
-): Omit<AcrConnection, 'auth'> {
-  const { auth: _auth, match: _match, ...info } = connection;
-  return info;
-}
+type AcrConnectionsConfigEntry = AcrConfiguredConnection;
 
 /**
- * Default implementation of the {@link AcrConnectionsService} that reads
- * connections from the `acr.connections` configuration.
- *
- * @public
+ * Reads and validates the Azure Container Registry connections from config,
+ * with the same rules as `buildConnectionsFromConfig` from
+ * `@backstage/connections/config`.
  */
-export class DefaultAcrConnectionsService implements AcrConnectionsService {
-  static create(options: {
-    config: RootConfigService;
-    logger: LoggerService;
-    pluginId?: string;
-  }): DefaultAcrConnectionsService {
-    const pluginId = options.pluginId ?? 'acr';
-    const raw = options.config.getOptional(CONFIG_KEY) ?? [];
-    if (!Array.isArray(raw)) {
-      throw new InputError(
-        `Expected "${CONFIG_KEY}" config to be an array of connection objects`,
-      );
-    }
-
-    const connections = raw.map(parseConnection);
-
-    const seenHosts = new Set<string>();
-    for (const connection of connections) {
-      if (seenHosts.has(connection.host)) {
-        throw new InputError(
-          `Duplicate connection of type "acr" for host "${connection.host}"`,
-        );
-      }
-      seenHosts.add(connection.host);
-    }
-
-    const pluginConnections = connections.flatMap(connection => {
-      if (connection.match && !connection.match.plugins.includes(pluginId)) {
-        return [];
-      }
-      const matched = connection.auth.filter(a =>
-        a.match?.plugins.includes(pluginId),
-      );
-      const unmatched = connection.auth.filter(a => !a.match);
-      return [{ ...connection, auth: [...matched, ...unmatched] }];
-    });
-
-    options.logger.info(
-      `Loaded ${pluginConnections.length} Azure Container Registry connection${
-        pluginConnections.length === 1 ? '' : 's'
-      } from configuration`,
+export function buildAcrConnectionsFromConfig(
+  config: RootConfigService,
+): AcrConfiguredConnection[] {
+  const raw = config.getOptional(ACR_CONNECTIONS_CONFIG_KEY);
+  if (raw === undefined) {
+    return [];
+  }
+  if (!Array.isArray(raw)) {
+    throw new InputError(
+      `Expected "${ACR_CONNECTIONS_CONFIG_KEY}" config to be an array of connection objects`,
     );
-
-    return new DefaultAcrConnectionsService(pluginConnections);
   }
 
-  private constructor(private readonly connections: ConfiguredConnection[]) {}
+  const connections = raw.map(entry => {
+    try {
+      if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+        throw new InputError('Expected connection to be an object');
+      }
+      return validateConnection(entry as Record<string, unknown>);
+    } catch (e) {
+      const type =
+        typeof (entry as { type?: unknown })?.type === 'string'
+          ? (entry as { type: string }).type
+          : 'unknown';
+      throw new InputError(
+        `Invalid connection of type "${type}" in ${ACR_CONNECTIONS_CONFIG_KEY} config:\n${describeError(
+          e,
+        )}`,
+      );
+    }
+  });
 
-  async list(): Promise<Omit<AcrConnection, 'auth'>[]> {
-    return this.connections.map(withoutAuth);
+  const hosts = new Set<string>();
+  for (const c of connections) {
+    if (hosts.has(c.host)) {
+      throw new InputError(
+        `Duplicate connection of type "${ACR_CONNECTION_TYPE}" for host "${c.host}"`,
+      );
+    }
+    hosts.add(c.host);
   }
+
+  for (const c of connections) {
+    c.title ??=
+      connections.length > 1
+        ? `${acrConnectionType.title} (${c.host})`
+        : acrConnectionType.title;
+  }
+
+  return connections;
+}
+
+class PluginAcrConnectionsService implements AcrConnectionsService {
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly connections: AcrConfiguredConnection[],
+  ) {}
 
   find<TAuthMethod extends AcrConnectionAuthMethod>(options: {
-    type: 'acr';
+    type: typeof ACR_CONNECTION_TYPE;
     query: { url: string };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<AcrConnection<TAuthMethod>>;
   find(options: {
-    type: 'acr';
+    type: typeof ACR_CONNECTION_TYPE;
     query: { url: string };
   }): Promise<Omit<AcrConnection, 'auth'>>;
-  async find(options: {
-    type: 'acr';
+  async find({
+    type,
+    query,
+    authMethods,
+  }: {
+    type: typeof ACR_CONNECTION_TYPE;
     query: { url: string };
-    authMethods?: readonly string[];
+    authMethods?: readonly AcrConnectionAuthMethod[];
   }): Promise<AcrConnection | Omit<AcrConnection, 'auth'>> {
-    const host = hostFromUrl(options.query.url);
-    const connection = this.connections.find(c => c.host === host);
-    if (!connection) {
-      throw new NotFoundError(
-        `Connection not found for type "acr" and host "${host}"`,
+    let host: string;
+    try {
+      host = new URL(query.url).host;
+    } catch {
+      throw new InputError(
+        `Invalid url "${query.url}" passed to ConnectionsService.find`,
       );
     }
-    if (!options.authMethods) {
-      return withoutAuth(connection);
+
+    this.logger.debug(
+      `Finding connection of type "${type}" matching host "${host}"`,
+    );
+    const connection = this.connections.find(c => c.host === host);
+    if (!connection) {
+      throw new NotFoundError(`Connection not found for type "${type}"`);
+    }
+
+    if (!authMethods) {
+      const { auth: _, ...info } = connection;
+      return info as Omit<AcrConnection, 'auth'>;
     }
 
     const selected = connection.auth[0];
     if (!selected) {
       throw new NotAllowedError(
-        `Connection of type "acr" for host "${host}" has no auth method available to this plugin`,
+        `Connection of type "${type}" for host "${host}" has no auth method available to this plugin`,
       );
     }
-    if (!options.authMethods.includes(selected.method)) {
+    if (!authMethods.includes(selected.method)) {
       throw new NotAllowedError(
-        `Connection not found for type "acr" with auth method "${selected.method}"`,
+        `Connection not found for type "${type}" with auth method "${selected.method}"`,
       );
     }
-    const { match: _match, ...auth } = selected;
-    return { ...withoutAuth(connection), auth } as AcrConnection;
+    this.logger.debug(
+      `Selected connection of type "${type}" for host "${host}" using auth method "${selected.method}"`,
+    );
+    return { ...connection, auth: selected } as AcrConnection;
+  }
+}
+
+/**
+ * Loads Azure Container Registry connections from configuration and hands out
+ * plugin-scoped lookups, mirroring the default connections service of the
+ * Backstage backend.
+ */
+export class DefaultAcrConnectionsService {
+  static create(options: {
+    config: RootConfigService;
+    logger: LoggerService;
+  }): DefaultAcrConnectionsService {
+    const connections = buildAcrConnectionsFromConfig(options.config);
+    if (connections.length > 0) {
+      options.logger.info(
+        `Loaded ${connections.length} connection${
+          connections.length === 1 ? '' : 's'
+        } of type "${ACR_CONNECTION_TYPE}" from configuration`,
+      );
+    }
+    return new DefaultAcrConnectionsService(options.logger, connections);
+  }
+
+  private constructor(
+    private readonly logger: LoggerService,
+    private readonly connections: AcrConfiguredConnection[],
+  ) {}
+
+  forPlugin(
+    pluginId: string,
+    options?: { logger?: LoggerService },
+  ): AcrConnectionsService {
+    const connections = this.connections.flatMap(connection => {
+      if (connection.match && !connection.match.plugins.includes(pluginId)) {
+        return [];
+      }
+      const pluginMatched = connection.auth.filter(a =>
+        a.match?.plugins.includes(pluginId),
+      );
+      const unmatched = connection.auth.filter(a => !a.match);
+      return [{ ...connection, auth: [...pluginMatched, ...unmatched] }];
+    });
+    return new PluginAcrConnectionsService(
+      options?.logger ?? this.logger,
+      connections,
+    );
+  }
+
+  /**
+   * The URL of the first configured connection, used for entities that don't
+   * select a registry.
+   */
+  getDefaultUrl(): string | undefined {
+    const first = this.connections[0];
+    return first ? `https://${first.host}` : undefined;
   }
 }

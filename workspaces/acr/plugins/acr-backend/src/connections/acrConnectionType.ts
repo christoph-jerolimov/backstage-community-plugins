@@ -22,14 +22,19 @@ import { InputError } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
 import { z } from 'zod/v4';
 
+/**
+ * The connection type key, following the naming of the built-in connection
+ * types of `@backstage/connections`, such as `azure-blob-storage`.
+ */
+export const ACR_CONNECTION_TYPE = 'azure-container-registry';
+
 type AcrConnectionTypeShape = {
-  type: 'acr';
+  type: typeof ACR_CONNECTION_TYPE;
   cardinality: 'multiton';
   lookupStrategy: 'host';
   query: { url: string };
   configSchema: {
     host: string;
-    name?: string;
     apiBaseUrl?: string;
   };
   auth: readonly (
@@ -44,34 +49,24 @@ type AcrConnectionTypeShape = {
  *
  * @remarks
  *
- * This follows the format of the connection types that are built into
- * `@backstage/connections`. The connection type registry of the core
- * connections service is not extensible yet, so ACR connections are read from
- * the `acr.connections` configuration instead of the top-level `connections`.
- *
- * @public
+ * Defined like the built-in connection types of `@backstage/connections`.
+ * Connection types can't be added to the core connections service from
+ * plugins yet, see
+ * https://backstage.io/docs/next/backend-system/core-services/connections/creating-a-connection-type
  */
 export type AcrConnectionTypeDefinition =
   ConnectionTypeDefinition<AcrConnectionTypeShape>;
 
-/**
- * The auth methods supported by ACR connections.
- *
- * @public
- */
+/** The auth methods supported by Azure Container Registry connections. */
 export type AcrConnectionAuthMethod =
   AcrConnectionTypeDefinition['authMethods'][number]['method'];
 
-/**
- * A resolved ACR connection, including the selected auth method.
- *
- * @public
- */
-export type AcrConnection<TAuthMethod extends string = string> = Connection<
-  ConnectionTypeDefinition<AcrConnectionTypeShape>,
-  TAuthMethod
->;
+/** A resolved Azure Container Registry connection with one selected auth method. */
+export type AcrConnection<
+  TAuthMethod extends AcrConnectionAuthMethod = AcrConnectionAuthMethod,
+> = Connection<ConnectionTypeDefinition<AcrConnectionTypeShape>, TAuthMethod>;
 
+// Same behavior as the internal createPortableSchema of @backstage/connections
 function createPortableSchema<TSchema extends z.ZodType>(
   schema: TSchema,
   errorMessage: string,
@@ -83,10 +78,7 @@ function createPortableSchema<TSchema extends z.ZodType>(
         return schema.parse(input);
       } catch (cause) {
         if (cause instanceof z.ZodError) {
-          throw new InputError(
-            `${errorMessage}: ${z.prettifyError(cause)}`,
-            cause,
-          );
+          throw new InputError(errorMessage, cause);
         }
         throw cause;
       }
@@ -101,53 +93,43 @@ function createPortableSchema<TSchema extends z.ZodType>(
   };
 }
 
-/**
- * The connection type for an Azure Container Registry.
- *
- * @public
- */
+function authMethod<TMethod extends string, TSchema extends z.ZodType>(
+  method: TMethod,
+  title: string,
+  configSchema: TSchema,
+) {
+  return {
+    method,
+    title,
+    configSchema: createPortableSchema(
+      configSchema,
+      `Invalid configuration for auth method "${method}" of connection type "${ACR_CONNECTION_TYPE}"`,
+    ),
+  };
+}
+
+/** The connection type for an Azure Container Registry. */
 export const acrConnectionType: AcrConnectionTypeDefinition = {
-  type: 'acr',
+  type: ACR_CONNECTION_TYPE,
   title: 'Azure Container Registry',
   cardinality: 'multiton',
   lookupStrategy: 'host',
   configSchema: createPortableSchema(
     z
       .object({
-        host: z.string().min(1),
-        name: z.string().min(1).optional(),
-        apiBaseUrl: z.url().optional(),
+        host: z.string(),
+        apiBaseUrl: z.string().optional(),
       })
       .strict(),
-    'Invalid configuration for connection type "acr"',
+    `Invalid configuration for connection type "${ACR_CONNECTION_TYPE}"`,
   ),
   authMethods: [
-    {
-      method: 'none',
-      title: 'None',
-      configSchema: createPortableSchema(
-        z.object({}),
-        'Invalid configuration for auth method "none" of connection type "acr"',
-      ),
-    },
-    {
-      method: 'token',
-      title: 'Bearer Token',
-      configSchema: createPortableSchema(
-        z.object({ token: z.string().min(1) }),
-        'Invalid configuration for auth method "token" of connection type "acr"',
-      ),
-    },
-    {
-      method: 'basic',
-      title: 'Username and Password',
-      configSchema: createPortableSchema(
-        z.object({
-          username: z.string().min(1),
-          password: z.string().min(1),
-        }),
-        'Invalid configuration for auth method "basic" of connection type "acr"',
-      ),
-    },
+    authMethod('none', 'None', z.object({})),
+    authMethod('token', 'Token', z.object({ token: z.string() })),
+    authMethod(
+      'basic',
+      'Basic',
+      z.object({ username: z.string(), password: z.string() }),
+    ),
   ],
 };

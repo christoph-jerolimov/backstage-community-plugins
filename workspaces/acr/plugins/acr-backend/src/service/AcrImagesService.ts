@@ -20,7 +20,10 @@ import type {
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { InputError, NotFoundError, ResponseError } from '@backstage/errors';
 import type { CatalogService } from '@backstage/plugin-catalog-node';
-import type { AcrConnection } from '../connections/acrConnectionType';
+import {
+  ACR_CONNECTION_TYPE,
+  type AcrConnection,
+} from '../connections/acrConnectionType';
 import type { AcrConnectionsService } from '../connections/AcrConnectionsService';
 
 /**
@@ -32,8 +35,9 @@ export const ACR_ANNOTATION_REPOSITORY_NAME =
   'azure-container-registry/repository-name';
 
 /**
- * Entity annotation that selects the registry. Matches the `name` or the
- * `host` of a configured connection. The first connection is used if missing.
+ * Entity annotation that selects the registry, either by registry name
+ * (`myregistry` for `myregistry.azurecr.io`) or by host. The first configured
+ * connection is used if the annotation is missing.
  *
  * @public
  */
@@ -111,6 +115,8 @@ export class AcrImagesService {
     private readonly options: {
       catalog: CatalogService;
       connections: AcrConnectionsService;
+      /** The registry URL for entities without a registry annotation. */
+      defaultRegistryUrl?: string;
       logger: LoggerService;
       fetch?: typeof fetch;
     },
@@ -147,14 +153,23 @@ export class AcrImagesService {
       );
     }
 
-    const host = await this.resolveRegistryHost(
+    const registryUrl = this.getRegistryUrl(
       annotations[ACR_ANNOTATION_REGISTRY_NAME],
     );
-    const connection = await this.options.connections.find({
-      type: 'acr',
-      query: { url: `https://${host}` },
-      authMethods: ['none', 'token', 'basic'],
-    });
+    const connection = await this.options.connections
+      .find({
+        type: ACR_CONNECTION_TYPE,
+        query: { url: registryUrl },
+        authMethods: ['none', 'token', 'basic'],
+      })
+      .catch(error => {
+        if (error?.name === 'NotFoundError') {
+          throw new NotFoundError(
+            `No Azure Container Registry connection is configured for ${registryUrl}`,
+          );
+        }
+        throw error;
+      });
 
     const url = buildTagsUrl(connection, repository, limit);
     this.options.logger.debug(
@@ -184,25 +199,18 @@ export class AcrImagesService {
     };
   }
 
-  private async resolveRegistryHost(registryName?: string): Promise<string> {
-    const connections = await this.options.connections.list();
+  private getRegistryUrl(registryName?: string): string {
     if (!registryName) {
-      if (connections.length === 0) {
+      if (!this.options.defaultRegistryUrl) {
         throw new NotFoundError(
           'No Azure Container Registry connection is configured',
         );
       }
-      return connections[0].host;
+      return this.options.defaultRegistryUrl;
     }
-    const match =
-      connections.find(c => c.name === registryName) ??
-      connections.find(c => c.host === registryName) ??
-      connections.find(c => c.host === `${registryName}.azurecr.io`);
-    if (!match) {
-      throw new NotFoundError(
-        `No Azure Container Registry connection found for registry "${registryName}"`,
-      );
-    }
-    return match.host;
+    const host = registryName.includes('.')
+      ? registryName
+      : `${registryName}.azurecr.io`;
+    return `https://${host}`;
   }
 }

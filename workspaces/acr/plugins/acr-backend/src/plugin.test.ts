@@ -82,14 +82,13 @@ describe('acrPlugin', () => {
             acr: {
               connections: [
                 {
-                  type: 'acr',
+                  type: 'azure-container-registry',
                   host: 'one.azurecr.io',
                   auth: [{ method: 'token', token: 'secret-token' }],
                 },
                 {
-                  type: 'acr',
+                  type: 'azure-container-registry',
                   host: 'two.azurecr.io',
-                  name: 'other',
                   auth: [
                     { method: 'basic', username: 'user', password: 'pass' },
                   ],
@@ -105,7 +104,7 @@ describe('acrPlugin', () => {
             }),
             entity('other-app', {
               'azure-container-registry/repository-name': 'other-app',
-              'azure-container-registry/registry-name': 'other',
+              'azure-container-registry/registry-name': 'two',
             }),
             entity('unknown-registry', {
               'azure-container-registry/repository-name': 'app',
@@ -186,7 +185,9 @@ describe('acrPlugin', () => {
       '/api/acr/tags?entityRef=component:default/unknown-registry',
     );
     expect(unknownRegistry.status).toBe(404);
-    expect(unknownRegistry.body.error.message).toContain('"unknown"');
+    expect(unknownRegistry.body.error.message).toContain(
+      'https://unknown.azurecr.io',
+    );
 
     fetchMock.mockResolvedValueOnce(new Response('', { status: 404 }));
     const missingRepo = await request(server).get(
