@@ -55,6 +55,21 @@ proxy:
       # Change to "false" in case of using self hosted artifactory instance with a self-signed certificate
       secure: true
 
+# Connections for the ACR backend plugin (@backstage-community/plugin-acr-backend).
+# Uses the same format as the top-level `connections` config of the Backstage
+# connections service. Uncomment and configure in app-config.local.yaml.
+# acr:
+#   connections:
+#     - type: acr
+#       host: ${ACR_HOST}
+#       auth:
+#         - method: basic
+#           username: ${ACR_USERNAME}
+#           password: ${ACR_PASSWORD}
+#         # or a bearer token:
+#         # - method: token
+#         #   token: ${ACR_TOKEN}
+
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
 # and an external cloud storage when deploying TechDocs for production use-case.

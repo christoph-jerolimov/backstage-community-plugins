@@ -1,0 +1,79 @@
+{
+  "name": "@backstage-community/plugin-acr-backend",
+  "version": "0.1.0",
+  "description": "A Backstage backend plugin that loads container image information from Azure Container Registry",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "backend-plugin",
+    "pluginId": "acr",
+    "pluginPackage": "@backstage-community/plugin-acr-backend",
+    "pluginPackages": [
+      "@backstage-community/plugin-acr",
+      "@backstage-community/plugin-acr-backend"
+    ]
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "package.json": [
+        "package.json"
+      ]
+    }
+  },
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack"
+  },
+  "dependencies": {
+    "@backstage/backend-plugin-api": "^1.11.0",
+    "@backstage/catalog-model": "^1.10.2",
+    "@backstage/connections": "^0.4.1",
+    "@backstage/errors": "^1.3.2",
+    "@backstage/plugin-catalog-node": "^2.2.6",
+    "@backstage/types": "^1.2.2",
+    "express": "^4.17.1",
+    "express-promise-router": "^4.1.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@backstage/backend-defaults": "^0.18.1",
+    "@backstage/backend-test-utils": "^1.11.8",
+    "@backstage/cli": "^0.36.7",
+    "@types/express": "^4.17.6",
+    "@types/supertest": "^2.0.12",
+    "supertest": "^6.2.4"
+  },
+  "files": [
+    "dist",
+    "config.d.ts"
+  ],
+  "configSchema": "config.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/backstage/community-plugins",
+    "directory": "workspaces/acr/plugins/acr-backend"
+  },
+  "keywords": [
+    "backstage",
+    "plugin",
+    "backend",
+    "acr",
+    "azure"
+  ],
+  "bugs": "https://github.com/backstage/community-plugins/issues"
+}

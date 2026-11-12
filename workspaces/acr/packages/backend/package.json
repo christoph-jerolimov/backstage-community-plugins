@@ -21,6 +21,7 @@
     "build-image": "docker build ../.. -f Dockerfile --tag backstage"
   },
   "dependencies": {
+    "@backstage-community/plugin-acr-backend": "workspace:^",
     "@backstage/backend-defaults": "^0.18.1",
     "@backstage/plugin-app-backend": "^0.5.19",
     "@backstage/plugin-auth-backend": "^0.30.2",

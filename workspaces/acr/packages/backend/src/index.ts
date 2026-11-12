@@ -56,4 +56,7 @@ backend.add(import('@backstage/plugin-search-backend-module-pg'));
 backend.add(import('@backstage/plugin-search-backend-module-catalog'));
 backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
+// acr plugin
+backend.add(import('@backstage-community/plugin-acr-backend'));
+
 backend.start();
