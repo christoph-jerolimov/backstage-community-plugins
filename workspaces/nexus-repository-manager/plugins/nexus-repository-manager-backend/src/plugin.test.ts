@@ -119,7 +119,7 @@ describe('nexusRepositoryManagerPlugin', () => {
       entityRef: 'component:default/maven-artifact',
       title: 'My library',
       connection: {
-        title: 'other-nexus.example.com:8443',
+        title: 'Nexus Repository Manager (other-nexus.example.com:8443)',
         host: 'other-nexus.example.com:8443',
         baseUrl: 'https://other-nexus.example.com:8443',
       },

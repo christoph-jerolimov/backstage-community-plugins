@@ -15,52 +15,58 @@
  */
 import type {
   Connection,
-  ConnectionType,
+  ConnectionTypeDefinition,
   PortableSchema,
 } from '@backstage/connections';
+import { InputError } from '@backstage/errors';
 import type { JsonObject } from '@backstage/types';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
-function portableSchema<TSchema extends z.ZodType>(
+// Mirrors the internal `createPortableSchema` of `@backstage/connections`,
+// which isn't exported for plugins.
+function createPortableSchema<TSchema extends z.ZodType>(
   schema: TSchema,
-): PortableSchema<z.output<TSchema>, unknown> {
+  errorMessage: string,
+): PortableSchema<z.infer<TSchema>, unknown> {
+  let cachedJsonSchema: JsonObject | undefined;
   return {
-    parse: input => schema.parse(input),
-    schema: () => ({ schema: z.toJSONSchema(schema) as JsonObject }),
+    parse(input: unknown) {
+      try {
+        return schema.parse(input);
+      } catch (cause) {
+        if (cause instanceof z.ZodError) {
+          throw new InputError(errorMessage, cause);
+        }
+        throw cause;
+      }
+    },
+    schema() {
+      if (!cachedJsonSchema) {
+        cachedJsonSchema = schema.toJSONSchema({
+          target: 'draft-07',
+          io: 'input',
+        }) as JsonObject;
+      }
+      return { schema: structuredClone(cachedJsonSchema) };
+    },
   };
 }
 
-const configSchema = z.strictObject({
-  host: z
-    .string()
-    .min(1)
-    .refine(host => !host.includes('/'), {
-      message: 'Must be a host name, without a scheme or path',
-    }),
-  baseUrl: z.url().optional(),
-});
-
-const authSchemas = {
-  none: z.strictObject({}),
-  token: z.strictObject({ token: z.string().min(1) }),
-  basic: z.strictObject({
-    username: z.string().min(1),
-    password: z.string().min(1),
-  }),
-};
+const TYPE = 'nexus-repository-manager';
 
 /**
- * The connection type for Nexus Repository Manager instances, defined with the
- * same shape and portable schemas as the built-in Backstage connection types.
+ * The connection type for Nexus Repository Manager instances.
  *
  * @remarks
  *
- * Each connection is identified by its `host`. Requests go to `baseUrl`, which
- * defaults to `https://<host>`.
+ * Defined the same way as the built-in connection types of
+ * `@backstage/connections`, such as `bitbucket-server`. Connections are looked
+ * up by the host of a URL, and requests go to `baseUrl`, which defaults to
+ * `https://<host>`.
  *
  * @public
  */
-export const nexusConnectionType: ConnectionType<{
+export const nexusConnectionType: ConnectionTypeDefinition<{
   type: 'nexus-repository-manager';
   cardinality: 'multiton';
   lookupStrategy: 'host';
@@ -72,31 +78,45 @@ export const nexusConnectionType: ConnectionType<{
     | { method: 'basic'; username: string; password: string }
   )[];
 }> = {
-  type: 'nexus-repository-manager',
+  type: TYPE,
   title: 'Nexus Repository Manager',
   cardinality: 'multiton',
   lookupStrategy: 'host',
-  configSchema: portableSchema(configSchema),
+  configSchema: createPortableSchema(
+    z
+      .object({
+        host: z.string(),
+        baseUrl: z.string().optional(),
+      })
+      .strict(),
+    `Invalid configuration for connection type "${TYPE}"`,
+  ),
   authMethods: [
     {
       method: 'none',
-      title: 'Anonymous',
-      configSchema: portableSchema(authSchemas.none),
+      title: 'None',
+      configSchema: createPortableSchema(
+        z.object({}),
+        `Invalid configuration for auth method "none" of connection type "${TYPE}"`,
+      ),
     },
     {
       method: 'token',
-      title: 'Bearer token',
-      configSchema: portableSchema(authSchemas.token),
+      title: 'Token',
+      configSchema: createPortableSchema(
+        z.object({ token: z.string() }),
+        `Invalid configuration for auth method "token" of connection type "${TYPE}"`,
+      ),
     },
     {
       method: 'basic',
-      title: 'Username and password',
-      configSchema: portableSchema(authSchemas.basic),
+      title: 'Basic',
+      configSchema: createPortableSchema(
+        z.object({ username: z.string(), password: z.string() }),
+        `Invalid configuration for auth method "basic" of connection type "${TYPE}"`,
+      ),
     },
   ],
-  // Type-level accessors only, mirroring the built-in connection types.
-  query: undefined as unknown as { url: string },
-  auth: [],
 };
 
 /**
@@ -108,7 +128,8 @@ export type NexusAuthMethod =
   (typeof nexusConnectionType)['authMethods'][number]['method'];
 
 /**
- * A resolved Nexus Repository Manager connection.
+ * A Nexus Repository Manager connection as returned by a connection lookup,
+ * with `auth` narrowed to the selected method.
  *
  * @public
  */

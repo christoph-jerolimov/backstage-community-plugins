@@ -5,7 +5,7 @@
 ```ts
 import { BackendFeature } from '@backstage/backend-plugin-api';
 import type { Connection } from '@backstage/connections';
-import type { ConnectionType } from '@backstage/connections';
+import type { ConnectionTypeDefinition } from '@backstage/connections';
 
 // @public
 export type DockerManifest =
@@ -98,7 +98,7 @@ export type NexusConnection<TAuthMethod extends string = string> = Connection<
 >;
 
 // @public
-export const nexusConnectionType: ConnectionType<{
+export const nexusConnectionType: ConnectionTypeDefinition<{
   type: 'nexus-repository-manager';
   cardinality: 'multiton';
   lookupStrategy: 'host';

@@ -23,11 +23,22 @@ export const testConfig = {
   nexusRepositoryManager: {
     connections: [
       {
+        type: 'nexus-repository-manager',
         title: 'Main Nexus',
         host: 'nexus.example.com',
-        auth: [{ method: 'token', token: 'secret-token' }],
+        auth: [
+          // Only for another plugin, so it must not be used
+          {
+            method: 'basic',
+            username: 'catalog',
+            password: 'catalog-only',
+            match: { plugins: ['catalog'] },
+          },
+          { method: 'token', token: 'secret-token' },
+        ],
       },
       {
+        type: 'nexus-repository-manager',
         host: 'other-nexus.example.com:8443',
         auth: [{ method: 'basic', username: 'user', password: 'pass' }],
       },

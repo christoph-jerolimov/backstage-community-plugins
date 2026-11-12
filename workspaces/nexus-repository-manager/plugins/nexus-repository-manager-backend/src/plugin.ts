@@ -20,6 +20,7 @@ import {
 import { actionsRegistryServiceRef } from '@backstage/backend-plugin-api/alpha';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 import { createGetEntityComponentsAction } from './actions/createGetEntityComponentsAction';
+import { DefaultNexusConnectionsService } from './connections/NexusConnectionsService';
 import { createRouter } from './router';
 import { NexusRepositoryManagerService } from './service/NexusRepositoryManagerService';
 
@@ -49,8 +50,14 @@ export const nexusRepositoryManagerPlugin = createBackendPlugin({
         httpRouter,
         logger,
       }) {
-        const nexusService = NexusRepositoryManagerService.fromConfig(config, {
+        const connections = DefaultNexusConnectionsService.create({
+          config,
+          logger,
+        }).forPlugin('nexus-repository-manager');
+        const nexusService = NexusRepositoryManagerService.create({
+          config,
           catalog,
+          connections,
           logger,
         });
 

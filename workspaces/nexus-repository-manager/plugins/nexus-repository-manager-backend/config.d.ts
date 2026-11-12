@@ -16,46 +16,49 @@
 export interface Config {
   nexusRepositoryManager?: {
     /**
-     * Connections to Nexus Repository Manager instances, in the same format as
-     * the Backstage `connections` configuration. Entities select an instance
-     * with the `nexus-repository-manager/host` annotation, and use the first
+     * Connections to Nexus Repository Manager instances, in the format of the
+     * Backstage `connections` configuration. Entities select an instance with
+     * the `nexus-repository-manager/host` annotation, and use the first
      * connection otherwise.
      */
     connections?: Array<{
-      /** Optional, must be `nexus-repository-manager` if set. */
-      type?: 'nexus-repository-manager';
-      /** Display title, defaults to the host. */
+      type: 'nexus-repository-manager';
+      /** Display title, defaults to "Nexus Repository Manager". */
       title?: string;
+      /** Restricts the connection to the given plugins. */
+      match?: { plugins: string[] };
       /** The host of the instance, e.g. `nexus.example.com`. */
       host: string;
       /** The base URL of the instance, defaults to `https://<host>`. */
       baseUrl?: string;
       /**
-       * Auth methods for the instance. The first entry is used.
+       * Auth methods for the instance. The first entry that is available to
+       * the plugin is used, preferring entries that match the plugin.
        */
       auth: Array<
-        | {
-            method: 'none';
-            title?: string;
-          }
-        | {
-            method: 'token';
-            title?: string;
-            /**
-             * Sent as `Authorization: Bearer <token>`.
-             * @visibility secret
-             */
-            token: string;
-          }
-        | {
-            method: 'basic';
-            title?: string;
-            username: string;
-            /**
-             * @visibility secret
-             */
-            password: string;
-          }
+        {
+          title?: string;
+          /** Restricts the auth entry to the given plugins. */
+          match?: { plugins: string[] };
+        } & (
+          | { method: 'none' }
+          | {
+              method: 'token';
+              /**
+               * Sent as `Authorization: Bearer <token>`.
+               * @visibility secret
+               */
+              token: string;
+            }
+          | {
+              method: 'basic';
+              username: string;
+              /**
+               * @visibility secret
+               */
+              password: string;
+            }
+        )
       >;
     }>;
   };

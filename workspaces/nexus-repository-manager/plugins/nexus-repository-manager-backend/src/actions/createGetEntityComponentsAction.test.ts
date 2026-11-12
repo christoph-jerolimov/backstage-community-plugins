@@ -24,6 +24,7 @@ import {
   testConfig,
   testEntities,
 } from '../__testUtils__/nexus';
+import { DefaultNexusConnectionsService } from '../connections/NexusConnectionsService';
 import { NexusRepositoryManagerService } from '../service/NexusRepositoryManagerService';
 import { createGetEntityComponentsAction } from './createGetEntityComponentsAction';
 
@@ -34,16 +35,20 @@ describe('createGetEntityComponentsAction', () => {
   it('loads the components of an entity', async () => {
     server.use(...createNexusHandlers());
 
+    const config = mockServices.rootConfig({ data: testConfig });
+    const logger = mockServices.logger.mock();
     const actionsRegistry = actionsRegistryServiceMock();
     createGetEntityComponentsAction({
       actionsRegistry,
-      nexusService: NexusRepositoryManagerService.fromConfig(
-        mockServices.rootConfig({ data: testConfig }),
-        {
-          catalog: catalogServiceMock({ entities: testEntities }),
-          logger: mockServices.logger.mock(),
-        },
-      ),
+      nexusService: NexusRepositoryManagerService.create({
+        config,
+        catalog: catalogServiceMock({ entities: testEntities }),
+        connections: DefaultNexusConnectionsService.create({
+          config,
+          logger,
+        }).forPlugin('nexus-repository-manager'),
+        logger,
+      }),
     });
 
     const { actions } = await actionsRegistry.list();

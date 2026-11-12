@@ -29,12 +29,13 @@ The plugin depends on the catalog plugin.
 
 ## Configuration
 
-Nexus Repository Manager instances are configured as connections, in the same format as the Backstage `connections` configuration. They live under `nexusRepositoryManager.connections` because the root `connections` configuration only accepts the connection types that are built into Backstage.
+Nexus Repository Manager instances are configured as connections, in the format of the Backstage [connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md). Each entry looks exactly like an entry of the root `connections` configuration, with the type `nexus-repository-manager`:
 
 ```yaml title="app-config.yaml"
 nexusRepositoryManager:
   connections:
-    - title: Nexus Repository Manager
+    - type: nexus-repository-manager
+      title: Nexus Repository Manager
       host: nexus.example.com
       # Optional, defaults to https://<host>
       baseUrl: https://nexus.example.com
@@ -42,6 +43,8 @@ nexusRepositoryManager:
         - method: token
           token: ${NEXUS_TOKEN}
 ```
+
+The entries live under `nexusRepositoryManager.connections` for now, because the Backstage connections service only accepts its built-in connection types and fails to start when the root `connections` configuration contains other types. Once custom connection types are supported, the entries can be moved to the root `connections` configuration as they are.
 
 The supported auth methods are:
 
@@ -51,7 +54,27 @@ The supported auth methods are:
 | `token` | `token`                | `Authorization: Bearer <token>` |
 | `basic` | `username`, `password` | `Authorization: Basic ...`      |
 
-The first auth entry of a connection is used.
+The connections are looked up the same way as by the connections service:
+
+- A connection is selected by its `host`, which must match the host of the URL exactly.
+- Connections and auth entries can be restricted to plugins with `match.plugins`. This plugin's ID is `nexus-repository-manager`.
+- The first auth entry that is available to this plugin is used. Entries whose `match.plugins` include this plugin come before entries without `match`.
+- Titles default to `Nexus Repository Manager`, or `Nexus Repository Manager (<host>)` when more than one connection is configured.
+
+For example, to give this plugin its own credentials for an instance that other plugins also use:
+
+```yaml title="app-config.yaml"
+nexusRepositoryManager:
+  connections:
+    - type: nexus-repository-manager
+      host: nexus.example.com
+      auth:
+        - method: token
+          token: ${NEXUS_BACKSTAGE_TOKEN}
+          match:
+            plugins: [nexus-repository-manager]
+        - method: none
+```
 
 Set `nexusRepositoryManager.experimentalAnnotations` to `true` to also search with the experimental annotations, the same as in the frontend plugin.
 

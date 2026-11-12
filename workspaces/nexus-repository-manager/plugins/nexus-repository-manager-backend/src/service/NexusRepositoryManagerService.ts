@@ -21,7 +21,7 @@ import { parseEntityRef, stringifyEntityRef } from '@backstage/catalog-model';
 import type { Config } from '@backstage/config';
 import { InputError, NotFoundError, ResponseError } from '@backstage/errors';
 import type { CatalogService } from '@backstage/plugin-catalog-node';
-import { NexusConnections } from '../connections/NexusConnections';
+import type { NexusConnectionsService } from '../connections/NexusConnectionsService';
 import type {
   NexusAuthMethod,
   NexusConnection,
@@ -137,12 +137,17 @@ function assetPath(asset: NexusAsset): string {
  * @public
  */
 export class NexusRepositoryManagerService {
-  static fromConfig(
-    config: Config,
-    options: { catalog: CatalogService; logger: LoggerService },
-  ): NexusRepositoryManagerService {
+  static create(options: {
+    config: Config;
+    catalog: CatalogService;
+    connections: NexusConnectionsService & {
+      getDefaultQuery(): { url: string } | undefined;
+    };
+    logger: LoggerService;
+  }): NexusRepositoryManagerService {
+    const { config } = options;
     return new NexusRepositoryManagerService(
-      NexusConnections.fromConfig(config),
+      options.connections,
       options.catalog,
       options.logger,
       config.getOptionalBoolean(
@@ -152,7 +157,9 @@ export class NexusRepositoryManagerService {
   }
 
   private constructor(
-    private readonly connections: NexusConnections,
+    private readonly connections: NexusConnectionsService & {
+      getDefaultQuery(): { url: string } | undefined;
+    },
     private readonly catalog: CatalogService,
     private readonly logger: LoggerService,
     private readonly experimentalAnnotations: boolean,
@@ -238,21 +245,18 @@ export class NexusRepositoryManagerService {
   private async findConnection(
     host?: string,
   ): Promise<NexusConnection<NexusAuthMethod>> {
-    let url: string;
-    if (host) {
-      url = toUrl(host);
-    } else {
-      const [first] = this.connections.list();
-      if (!first) {
-        throw new NotFoundError(
-          'No Nexus Repository Manager connections are configured',
-        );
-      }
-      url = `https://${first.host}`;
+    const query = host
+      ? { url: toUrl(host) }
+      : this.connections.getDefaultQuery();
+    if (!query) {
+      throw new NotFoundError(
+        'No Nexus Repository Manager connections are configured',
+      );
     }
 
     return this.connections.find({
-      query: { url },
+      type: 'nexus-repository-manager',
+      query,
       authMethods: ['token', 'basic', 'none'],
     });
   }
