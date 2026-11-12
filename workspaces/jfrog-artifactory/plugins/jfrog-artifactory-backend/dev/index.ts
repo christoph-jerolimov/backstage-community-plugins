@@ -22,7 +22,7 @@ import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 // Configure a connection in the workspace app-config.local.yaml, for example:
 //
 //   connections:
-//     - type: jfrog-artifactory
+//     - type: jfrog
 //       host: mycompany.jfrog.io
 //       auth:
 //         - method: token

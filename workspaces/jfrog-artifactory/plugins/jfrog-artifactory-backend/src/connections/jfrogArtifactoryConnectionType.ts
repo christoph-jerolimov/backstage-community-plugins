@@ -23,7 +23,7 @@ import { createConnectionType } from './createConnectionType';
  * @public
  */
 export const JfrogArtifactoryConnectionType = createConnectionType({
-  type: 'jfrog-artifactory',
+  type: 'jfrog',
   title: 'JFrog Artifactory',
   configSchema: z.object({
     host: z.string(),
@@ -85,7 +85,7 @@ export type JfrogArtifactoryAuthByMethod = {
  *
  * @remarks
  *
- * This has the same shape as `Connection<'jfrog-artifactory', TAuthMethod>`
+ * This has the same shape as `Connection<'jfrog', TAuthMethod>`
  * would have if the type was part of `@backstage/connections`.
  *
  * @public
@@ -93,7 +93,7 @@ export type JfrogArtifactoryAuthByMethod = {
 export type JfrogArtifactoryConnection<
   TAuthMethod extends JfrogArtifactoryAuthMethod = JfrogArtifactoryAuthMethod,
 > = {
-  type: 'jfrog-artifactory';
+  type: 'jfrog';
   title: string;
   host: string;
   baseUrl?: string;

@@ -120,12 +120,12 @@ const config = {
       auth: [{ method: 'token', token: 'github-token' }],
     },
     {
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       host: 'acme.jfrog.io',
       auth: [{ method: 'token', token: 'acme-token' }],
     },
     {
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       host: 'artifactory.example.com',
       auth: [{ method: 'basic', username: 'user', password: 'pass' }],
     },

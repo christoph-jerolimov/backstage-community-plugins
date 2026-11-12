@@ -79,7 +79,7 @@ export type JfrogArtifactoryAuthMethod =
 export type JfrogArtifactoryConnection<
   TAuthMethod extends JfrogArtifactoryAuthMethod = JfrogArtifactoryAuthMethod,
 > = {
-  type: 'jfrog-artifactory';
+  type: 'jfrog';
   title: string;
   host: string;
   baseUrl?: string;
@@ -90,7 +90,7 @@ export type JfrogArtifactoryConnection<
 export interface JfrogArtifactoryConnectionsService {
   // (undocumented)
   find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: {
       url: string;
     };
@@ -98,7 +98,7 @@ export interface JfrogArtifactoryConnectionsService {
   }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
   // (undocumented)
   find(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: {
       url: string;
     };
@@ -107,7 +107,7 @@ export interface JfrogArtifactoryConnectionsService {
 
 // @public
 export const JfrogArtifactoryConnectionType: ConnectionTypeDefinition<{
-  type: 'jfrog-artifactory';
+  type: 'jfrog';
   cardinality: 'multiton';
   lookupStrategy: 'host';
   query: {
@@ -249,7 +249,7 @@ export class PluginJfrogArtifactoryConnectionsService
 {
   // (undocumented)
   find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: {
       url: string;
     };
@@ -257,7 +257,7 @@ export class PluginJfrogArtifactoryConnectionsService
   }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
   // (undocumented)
   find(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: {
       url: string;
     };

@@ -33,12 +33,12 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
   it('reads connections in the connections config format and finds them by host', async () => {
     const service = create([
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'acme.jfrog.io',
         auth: [{ method: 'token', token: 'secret-token' }],
       },
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'artifactory.example.com:8082',
         baseUrl: 'http://artifactory.example.com:8082/',
         title: 'Internal',
@@ -57,12 +57,12 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     expect(connections.getDefaultUrl()).toBe('https://acme.jfrog.io');
 
     const token = await connections.find({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       query: { url: 'https://acme.jfrog.io/some/path' },
       authMethods: ['token'],
     });
     expect(token).toEqual({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       title: 'JFrog Artifactory (acme.jfrog.io)',
       host: 'acme.jfrog.io',
       auth: { method: 'token', title: 'Token', token: 'secret-token' },
@@ -73,12 +73,12 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     });
 
     const basic = await connections.find({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       query: { url: 'https://artifactory.example.com:8082' },
       authMethods: ['token', 'basic'],
     });
     expect(basic).toEqual({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       title: 'Internal',
       host: 'artifactory.example.com:8082',
       baseUrl: 'http://artifactory.example.com:8082/',
@@ -99,37 +99,37 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     // Without auth methods, the connection is returned without credentials
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://acme.jfrog.io' },
       }),
     ).resolves.toEqual({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       title: 'JFrog Artifactory (acme.jfrog.io)',
       host: 'acme.jfrog.io',
     });
 
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://unknown.jfrog.io' },
         authMethods: ['token'],
       }),
-    ).rejects.toThrow('Connection not found for type "jfrog-artifactory"');
+    ).rejects.toThrow('Connection not found for type "jfrog"');
 
     // Auth methods declare what the caller supports, they don't filter
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://acme.jfrog.io' },
         authMethods: ['basic'],
       }),
     ).rejects.toThrow(
-      'Connection not found for type "jfrog-artifactory" with auth method "token"',
+      'Connection not found for type "jfrog" with auth method "token"',
     );
 
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'not a url' },
         authMethods: ['token'],
       }),
@@ -139,19 +139,19 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
   it('uses a single default title and supports anonymous access', async () => {
     const connections = create([
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'acme.jfrog.io',
         auth: [{ method: 'none' }],
       },
     ]).forPlugin('jfrog-artifactory');
 
     const none = await connections.find({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       query: { url: 'https://acme.jfrog.io' },
       authMethods: ['token', 'none'],
     });
     expect(none).toEqual({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       title: 'JFrog Artifactory',
       host: 'acme.jfrog.io',
       auth: { method: 'none', title: 'None' },
@@ -162,7 +162,7 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
   it('scopes connections and auth methods to plugins', async () => {
     const service = create([
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'acme.jfrog.io',
         auth: [
           { method: 'token', token: 'shared-token' },
@@ -179,7 +179,7 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
         ],
       },
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'restricted.jfrog.io',
         match: { plugins: ['other'] },
         auth: [{ method: 'none' }],
@@ -189,14 +189,14 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     const jfrog = service.forPlugin('jfrog-artifactory');
     await expect(
       jfrog.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://acme.jfrog.io' },
         authMethods: ['token'],
       }),
     ).resolves.toMatchObject({ auth: { token: 'jfrog-token' } });
     await expect(
       jfrog.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://restricted.jfrog.io' },
         authMethods: ['none'],
       }),
@@ -205,7 +205,7 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     const unrelated = service.forPlugin('catalog');
     await expect(
       unrelated.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://acme.jfrog.io' },
         authMethods: ['token'],
       }),
@@ -221,7 +221,7 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
       },
       { host: 'no-type.example.com', invalid: true },
       {
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         host: 'acme.jfrog.io',
         auth: [{ method: 'token', token: 'jfrog-token' }],
       },
@@ -230,19 +230,19 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     expect(connections.getDefaultUrl()).toBe('https://acme.jfrog.io');
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://github.com' },
         authMethods: ['token'],
       }),
-    ).rejects.toThrow('Connection not found for type "jfrog-artifactory"');
+    ).rejects.toThrow('Connection not found for type "jfrog"');
     await expect(
       connections.find({
-        type: 'jfrog-artifactory',
+        type: 'jfrog',
         query: { url: 'https://acme.jfrog.io' },
         authMethods: ['token'],
       }),
     ).resolves.toEqual({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       title: 'JFrog Artifactory',
       host: 'acme.jfrog.io',
       auth: { method: 'token', title: 'Token', token: 'jfrog-token' },
@@ -260,19 +260,19 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
   });
 
   it('rejects invalid configuration', () => {
-    const valid = { type: 'jfrog-artifactory', host: 'acme.jfrog.io' };
+    const valid = { type: 'jfrog', host: 'acme.jfrog.io' };
 
     expect(() => create({})).toThrow(
       'Expected "connections" config to be an array of connection objects',
     );
     expect(() => create([{ ...valid, auth: [] }])).toThrow(
-      'Connection of type "jfrog-artifactory" must configure at least one auth method',
+      'Connection of type "jfrog" must configure at least one auth method',
     );
     expect(() => create([{ ...valid, auth: [{ token: 'x' }] }])).toThrow(
-      'Auth entry for connection type "jfrog-artifactory" is missing a "method" field',
+      'Auth entry for connection type "jfrog" is missing a "method" field',
     );
     expect(() => create([{ ...valid, auth: [{ method: 'oauth' }] }])).toThrow(
-      'Unknown auth method "oauth" for connection type "jfrog-artifactory"',
+      'Unknown auth method "oauth" for connection type "jfrog"',
     );
     expect(() => create([{ ...valid, auth: [{ method: 'token' }] }])).toThrow(
       /expected string, received undefined[\s\S]*at token/,
@@ -280,15 +280,13 @@ describe('DefaultJfrogArtifactoryConnectionsService', () => {
     expect(() =>
       create([{ ...valid, unknown: true, auth: [{ method: 'none' }] }]),
     ).toThrow(
-      /Invalid connection of type "jfrog-artifactory" in connections config:[\s\S]*Unrecognized key: "unknown"/,
+      /Invalid connection of type "jfrog" in connections config:[\s\S]*Unrecognized key: "unknown"/,
     );
     expect(() =>
       create([
         { ...valid, auth: [{ method: 'none' }] },
         { ...valid, auth: [{ method: 'none' }] },
       ]),
-    ).toThrow(
-      'Duplicate connection of type "jfrog-artifactory" for host "acme.jfrog.io"',
-    );
+    ).toThrow('Duplicate connection of type "jfrog" for host "acme.jfrog.io"');
   });
 });

@@ -19,16 +19,16 @@ backend.add(import('@backstage-community/plugin-jfrog-artifactory-backend'));
 
 ## Configuration
 
-JFrog Artifactory instances are configured as `jfrog-artifactory` entries in the top-level `connections` list, the configuration of the [Backstage connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md). Each entry has a `type`, an optional `title`, the connection fields, and a list of `auth` methods.
+JFrog Artifactory instances are configured as `jfrog` entries in the top-level `connections` list, the configuration of the [Backstage connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md). Each entry has a `type`, an optional `title`, the connection fields, and a list of `auth` methods.
 
 ```yaml title="app-config.yaml"
 connections:
-  - type: jfrog-artifactory
+  - type: jfrog
     host: mycompany.jfrog.io
     auth:
       - method: token
         token: ${JFROG_ARTIFACTORY_TOKEN}
-  - type: jfrog-artifactory
+  - type: jfrog
     title: Internal Artifactory
     host: artifactory.example.com:8082
     # Optional, defaults to https://<host>
@@ -49,7 +49,7 @@ jfrogArtifactory:
 ```
 
 > [!WARNING]
-> The Backstage connections service does not include a `jfrog-artifactory` connection type yet, so this plugin reads its own entries from the `connections` list. The connections service is still experimental and, at the time of writing, only used by example plugins. If your backend includes a plugin that uses the connections service, that service rejects the `jfrog-artifactory` entries with an `Unrecognised connection type` error at startup.
+> The Backstage connections service does not include a `jfrog` connection type yet, so this plugin reads its own entries from the `connections` list. The connections service is still experimental and, at the time of writing, only used by example plugins. If your backend includes a plugin that uses the connections service, that service rejects the `jfrog` entries with an `Unrecognised connection type` error at startup.
 
 Supported auth methods:
 

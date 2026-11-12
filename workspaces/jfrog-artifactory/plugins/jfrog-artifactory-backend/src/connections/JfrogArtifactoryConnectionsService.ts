@@ -60,13 +60,13 @@ export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY = 'connections';
  */
 export interface JfrogArtifactoryConnectionsService {
   find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: { url: string };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
 
   find(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: { url: string };
   }): Promise<Omit<JfrogArtifactoryConnection, 'auth'>>;
 }
@@ -252,16 +252,16 @@ export class PluginJfrogArtifactoryConnectionsService
   }
 
   find<TAuthMethod extends JfrogArtifactoryAuthMethod>(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: { url: string };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<JfrogArtifactoryConnection<TAuthMethod>>;
   find(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: { url: string };
   }): Promise<Omit<JfrogArtifactoryConnection, 'auth'>>;
   async find(options: {
-    type: 'jfrog-artifactory';
+    type: 'jfrog';
     query: { url: string };
     authMethods?: readonly JfrogArtifactoryAuthMethod[];
   }): Promise<

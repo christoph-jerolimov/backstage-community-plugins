@@ -117,7 +117,7 @@ export class JfrogArtifactoryService {
       : this.options.connections.getDefaultUrl();
     if (!url) {
       throw new NotFoundError(
-        'No JFrog Artifactory connection is configured, add a connection of type "jfrog-artifactory" to the connections config',
+        'No JFrog Artifactory connection is configured, add a connection of type "jfrog" to the connections config',
       );
     }
     const host = new URL(url).host;
@@ -136,7 +136,7 @@ export class JfrogArtifactoryService {
     repoFilter?: string;
   }): Promise<JfrogArtifactoryTagsResponse> {
     const connection = await this.options.connections.find({
-      type: 'jfrog-artifactory',
+      type: 'jfrog',
       query: { url: options.url },
       authMethods: ['token', 'basic', 'none'],
     });

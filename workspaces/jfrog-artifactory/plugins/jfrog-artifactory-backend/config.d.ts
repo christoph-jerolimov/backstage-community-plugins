@@ -21,12 +21,12 @@ export interface Config {
    * @remarks
    *
    * This schema only describes what the JFrog Artifactory backend plugin needs
-   * to know about the `jfrog-artifactory` entries, and accepts connections of
+   * to know about the `jfrog` entries, and accepts connections of
    * any other type. It marks the credentials of the `token` and `basic` auth
    * methods as secret, so that they are redacted from logs.
    */
   connections?: Array<{
-    /** The connection type, `jfrog-artifactory` for JFrog Artifactory. */
+    /** The connection type, `jfrog` for JFrog Artifactory. */
     type: string;
     /** A human readable title for this connection. */
     title?: string;
