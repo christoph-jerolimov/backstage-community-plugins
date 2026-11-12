@@ -17,7 +17,9 @@
 // Reads and looks up JFrog Artifactory connections. This follows
 // `buildConnectionsFromConfig` of `@backstage/connections/config` and the
 // `DefaultConnectionsService` of `@backstage/connections-node`, limited to
-// the JFrog Artifactory connection type and a plugin-scoped config key.
+// the JFrog Artifactory connection type. The core connections service does not
+// know this type yet, so the entries of this type in the top-level
+// `connections` config are read here.
 
 import {
   LoggerService,
@@ -43,8 +45,7 @@ import {
  *
  * @public
  */
-export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY =
-  'jfrogArtifactory.connections';
+export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY = 'connections';
 
 /**
  * Looks up JFrog Artifactory connections for a plugin.
@@ -159,8 +160,8 @@ function validateConnection(connection: JsonObject): ConfiguredConnection {
 }
 
 /**
- * Reads the JFrog Artifactory connections from config, in the format of the
- * Backstage connections config.
+ * Reads the JFrog Artifactory connections from the top-level `connections`
+ * config, and ignores connections of other types.
  */
 function buildConnectionsFromConfig(options: {
   config: RootConfigService;
@@ -177,18 +178,23 @@ function buildConnectionsFromConfig(options: {
     );
   }
 
-  const connections = (raw as JsonObject[]).map(entry => {
-    try {
-      return validateConnection(entry);
-    } catch (e) {
-      const type = typeof entry?.type === 'string' ? entry.type : 'unknown';
-      throw new InputError(
-        `Invalid connection of type "${type}" in ${JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY} config:\n${describeError(
-          e,
-        )}`,
-      );
-    }
-  });
+  // The connections config holds connections of all types. Only the JFrog
+  // Artifactory ones are read here, all others belong to the core
+  // connections service.
+  const connections = (raw as JsonObject[])
+    .filter(entry => entry?.type === JfrogArtifactoryConnectionType.type)
+    .map(entry => {
+      try {
+        return validateConnection(entry);
+      } catch (e) {
+        const type = typeof entry?.type === 'string' ? entry.type : 'unknown';
+        throw new InputError(
+          `Invalid connection of type "${type}" in ${JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY} config:\n${describeError(
+            e,
+          )}`,
+        );
+      }
+    });
 
   const identitiesSeen = new Set<string>();
   for (const c of connections) {

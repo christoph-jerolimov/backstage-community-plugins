@@ -19,28 +19,26 @@ backend.add(import('@backstage-community/plugin-jfrog-artifactory-backend'));
 
 ## Configuration
 
-JFrog Artifactory connections use the format of the [Backstage connections config](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md): each entry has a `type`, an optional `title`, the connection fields, and a list of `auth` methods.
-
-The connections live under `jfrogArtifactory.connections` and not under the top-level `connections` key. The Backstage connections service only accepts its built-in connection types, and JFrog Artifactory is not one of them yet, so an entry there would fail at startup. Once a `jfrog-artifactory` connection type exists in Backstage, the entries can be moved to the top-level `connections` list as they are.
+JFrog Artifactory instances are configured as `jfrog-artifactory` entries in the top-level `connections` list, the configuration of the [Backstage connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md). Each entry has a `type`, an optional `title`, the connection fields, and a list of `auth` methods.
 
 ```yaml title="app-config.yaml"
-jfrogArtifactory:
-  connections:
-    - type: jfrog-artifactory
-      host: mycompany.jfrog.io
-      auth:
-        - method: token
-          token: ${JFROG_ARTIFACTORY_TOKEN}
-    - type: jfrog-artifactory
-      title: Internal Artifactory
-      host: artifactory.example.com:8082
-      # Optional, defaults to https://<host>
-      baseUrl: http://artifactory.example.com:8082
-      auth:
-        - method: basic
-          username: ${JFROG_USERNAME}
-          password: ${JFROG_PASSWORD}
+connections:
+  - type: jfrog-artifactory
+    host: mycompany.jfrog.io
+    auth:
+      - method: token
+        token: ${JFROG_ARTIFACTORY_TOKEN}
+  - type: jfrog-artifactory
+    title: Internal Artifactory
+    host: artifactory.example.com:8082
+    # Optional, defaults to https://<host>
+    baseUrl: http://artifactory.example.com:8082
+    auth:
+      - method: basic
+        username: ${JFROG_USERNAME}
+        password: ${JFROG_PASSWORD}
 
+jfrogArtifactory:
   # Optional settings, shared with the frontend plugin
   # Sort field for tags: 'NAME_SEMVER' (default) or 'MODIFIED'
   sortField: MODIFIED
@@ -50,6 +48,9 @@ jfrogArtifactory:
   pageLimit: 100
 ```
 
+> [!WARNING]
+> The Backstage connections service does not include a `jfrog-artifactory` connection type yet, so this plugin reads its own entries from the `connections` list. The connections service is still experimental and, at the time of writing, only used by example plugins. If your backend includes a plugin that uses the connections service, that service rejects the `jfrog-artifactory` entries with an `Unrecognised connection type` error at startup.
+
 Supported auth methods:
 
 | Method  | Fields                 | Description                                    |
@@ -58,7 +59,7 @@ Supported auth methods:
 | `basic` | `username`, `password` | Basic authentication                           |
 | `none`  |                        | Anonymous access                               |
 
-Like in the connections config, a connection and each auth entry can have a `match` block that restricts it to specific plugins, for example `match: { plugins: [jfrog-artifactory] }`. Auth entries that match the plugin are preferred, otherwise the first entry is used.
+As in the rest of the connections config, a connection and each auth entry can have a `match` block that restricts it to specific plugins, for example `match: { plugins: [jfrog-artifactory] }`. Auth entries that match the plugin are preferred, otherwise the first entry is used.
 
 ## Entity annotations
 

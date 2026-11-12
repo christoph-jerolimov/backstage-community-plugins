@@ -50,8 +50,7 @@ export const JFROG_ARTIFACTORY_ANNOTATION_REPO_FILTER =
   'jfrog-artifactory/repo-filter';
 
 // @public
-export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY =
-  'jfrogArtifactory.connections';
+export const JFROG_ARTIFACTORY_CONNECTIONS_CONFIG_KEY = 'connections';
 
 // @public
 export type JfrogArtifactoryAuthByMethod = {

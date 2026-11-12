@@ -117,7 +117,7 @@ export class JfrogArtifactoryService {
       : this.options.connections.getDefaultUrl();
     if (!url) {
       throw new NotFoundError(
-        'No JFrog Artifactory connection is configured in jfrogArtifactory.connections',
+        'No JFrog Artifactory connection is configured, add a connection of type "jfrog-artifactory" to the connections config',
       );
     }
     const host = new URL(url).host;

@@ -14,64 +14,57 @@
  * limitations under the License.
  */
 export interface Config {
-  /** Configuration for the JFrog Artifactory plugin */
-  jfrogArtifactory?: {
+  /**
+   * Connections to external services, in the format of the Backstage
+   * connections config.
+   *
+   * @remarks
+   *
+   * This schema only describes what the JFrog Artifactory backend plugin needs
+   * to know about the `jfrog-artifactory` entries, and accepts connections of
+   * any other type. It marks the credentials of the `token` and `basic` auth
+   * methods as secret, so that they are redacted from logs.
+   */
+  connections?: Array<{
+    /** The connection type, `jfrog-artifactory` for JFrog Artifactory. */
+    type: string;
+    /** A human readable title for this connection. */
+    title?: string;
     /**
-     * JFrog Artifactory instances the backend can talk to.
-     *
-     * Each entry uses the format of the Backstage connections config
-     * (`type`, `title`, `match`, `auth`), so that it can move to the top-level
-     * `connections` config once it supports JFrog Artifactory connections.
+     * The host of the service, including the port if it is not the default
+     * one, for example `mycompany.jfrog.io`.
      */
-    connections?: Array<{
-      /** The connection type, must be `jfrog-artifactory`. */
-      type: 'jfrog-artifactory';
-      /** A human readable title for this connection. */
+    host?: string;
+    /**
+     * For JFrog Artifactory: the base URL of the JFrog Platform API.
+     * Defaults to `https://<host>`.
+     */
+    baseUrl?: string;
+    /** Restricts this connection to specific plugins. */
+    match?: {
+      plugins: string[];
+    };
+    /** Auth methods for this connection. */
+    auth?: Array<{
+      /** The auth method, `none`, `token` or `basic` for JFrog Artifactory. */
+      method: string;
       title?: string;
-      /**
-       * The host of the JFrog Artifactory instance, including the port if it
-       * is not the default one, for example `mycompany.jfrog.io`.
-       */
-      host: string;
-      /**
-       * The base URL of the JFrog Platform API. Defaults to `https://<host>`.
-       */
-      baseUrl?: string;
-      /** Restricts this connection to specific plugins. */
+      /** Restricts this auth method to specific plugins. */
       match?: {
         plugins: string[];
       };
       /**
-       * Auth methods for this connection. Entries that match the plugin are
-       * preferred, otherwise the first entry is used.
+       * An access or identity token, sent as a Bearer token.
+       * @visibility secret
        */
-      auth: Array<
-        | {
-            method: 'none';
-            title?: string;
-            match?: { plugins: string[] };
-          }
-        | {
-            method: 'token';
-            title?: string;
-            match?: { plugins: string[] };
-            /**
-             * An access token or identity token, sent as a Bearer token.
-             * @visibility secret
-             */
-            token: string;
-          }
-        | {
-            method: 'basic';
-            title?: string;
-            match?: { plugins: string[] };
-            username: string;
-            /**
-             * @visibility secret
-             */
-            password: string;
-          }
-      >;
+      token?: string;
+      /** The username of the `basic` auth method. */
+      username?: string;
+      /**
+       * The password of the `basic` auth method.
+       * @visibility secret
+       */
+      password?: string;
     }>;
-  };
+  }>;
 }
