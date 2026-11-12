@@ -29,11 +29,11 @@ The plugin depends on the catalog plugin.
 
 ## Configuration
 
-Nexus Repository Manager instances are configured in the root `connections` configuration of the Backstage [connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md), with the type `nexus-repository-manager`. The plugin reads these entries and ignores connections of other types:
+Nexus Repository Manager instances are configured in the root `connections` configuration of the Backstage [connections service](https://github.com/backstage/backstage/blob/master/beps/0014-connection-service/README.md), with the type `nexus`. The plugin reads these entries and ignores connections of other types:
 
 ```yaml title="app-config.yaml"
 connections:
-  - type: nexus-repository-manager
+  - type: nexus
     title: Nexus Repository Manager
     host: nexus.example.com
     # Optional, defaults to https://<host>
@@ -50,7 +50,7 @@ connections:
 ```
 
 > [!WARNING]
-> The Backstage connections service only knows its built-in connection types and rejects all others, including `nexus-repository-manager`. Backstage 1.54 doesn't use the service by default, but in newer releases the backend fails to start as soon as any installed plugin uses the connections service while a `nexus-repository-manager` connection is configured. Check your backend before upgrading Backstage.
+> The Backstage connections service only knows its built-in connection types and rejects all others, including `nexus`. Backstage 1.54 doesn't use the service by default, but in newer releases the backend fails to start as soon as any installed plugin uses the connections service while a `nexus` connection is configured. Check your backend before upgrading Backstage.
 
 The supported auth methods are:
 
@@ -71,7 +71,7 @@ For example, to give this plugin its own credentials for an instance that other 
 
 ```yaml title="app-config.yaml"
 connections:
-  - type: nexus-repository-manager
+  - type: nexus
     host: nexus.example.com
     auth:
       - method: token

@@ -48,13 +48,13 @@ type NexusConfiguredConnection = ConfiguredConnection<
  */
 export interface NexusConnectionsService {
   find<TAuthMethod extends NexusAuthMethod>(options: {
-    type: 'nexus-repository-manager';
+    type: 'nexus';
     query: { url: string };
     authMethods: readonly [TAuthMethod, ...TAuthMethod[]];
   }): Promise<NexusConnection<TAuthMethod>>;
 
   find(options: {
-    type: 'nexus-repository-manager';
+    type: 'nexus';
     query: { url: string };
   }): Promise<Omit<NexusConnection, 'auth'>>;
 }
@@ -197,7 +197,7 @@ class PluginNexusConnectionsService implements NexusConnectionsService {
   }
 
   async find(options: {
-    type: 'nexus-repository-manager';
+    type: 'nexus';
     query: { url: string };
     authMethods?: readonly [NexusAuthMethod, ...NexusAuthMethod[]];
   }): Promise<any> {

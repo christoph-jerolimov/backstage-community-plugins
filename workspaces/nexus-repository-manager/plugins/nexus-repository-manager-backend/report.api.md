@@ -99,7 +99,7 @@ export type NexusConnection<TAuthMethod extends string = string> = Connection<
 
 // @public
 export const nexusConnectionType: ConnectionTypeDefinition<{
-  type: 'nexus-repository-manager';
+  type: 'nexus';
   cardinality: 'multiton';
   lookupStrategy: 'host';
   query: {

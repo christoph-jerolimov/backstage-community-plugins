@@ -17,14 +17,14 @@ export interface Config {
   /**
    * Connections to external services, in the format of the Backstage
    * connections service. This plugin reads the entries of type
-   * `nexus-repository-manager` and leaves all others to Backstage.
+   * `nexus` and leaves all others to Backstage.
    *
    * Entities select a Nexus Repository Manager connection with the
    * `nexus-repository-manager/host` annotation, and use the first one
    * otherwise.
    */
   connections?: Array<{
-    /** The connection type, `nexus-repository-manager` for this plugin. */
+    /** The connection type, `nexus` for this plugin. */
     type: string;
     /** Display title, defaults to "Nexus Repository Manager". */
     title?: string;

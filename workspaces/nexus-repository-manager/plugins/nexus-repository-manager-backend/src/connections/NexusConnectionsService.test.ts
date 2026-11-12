@@ -30,7 +30,7 @@ describe('DefaultNexusConnectionsService', () => {
   it('finds connections with plugin scoping and default titles', async () => {
     const service = create([
       {
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         title: 'Production',
         host: 'nexus.example.com',
         baseUrl: 'https://nexus.example.com/nexus',
@@ -50,7 +50,7 @@ describe('DefaultNexusConnectionsService', () => {
         ],
       },
       {
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         host: 'internal.example.com',
         match: { plugins: ['catalog'] },
         auth: [{ method: 'none' }],
@@ -63,12 +63,12 @@ describe('DefaultNexusConnectionsService', () => {
     // Auth entries that match the plugin come first
     await expect(
       nexus.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://nexus.example.com/some/path' },
         authMethods: ['none', 'token', 'basic'],
       }),
     ).resolves.toEqual({
-      type: 'nexus-repository-manager',
+      type: 'nexus',
       title: 'Production',
       host: 'nexus.example.com',
       baseUrl: 'https://nexus.example.com/nexus',
@@ -76,7 +76,7 @@ describe('DefaultNexusConnectionsService', () => {
     });
     await expect(
       catalog.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://nexus.example.com' },
         authMethods: ['none', 'token', 'basic'],
       }),
@@ -85,20 +85,19 @@ describe('DefaultNexusConnectionsService', () => {
     // Like the connections service, the best auth entry must be supported
     await expect(
       nexus.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://nexus.example.com' },
         authMethods: ['none'],
       }),
     ).rejects.toMatchObject({
       name: 'NotAllowedError',
-      message:
-        'Connection not found for type "nexus-repository-manager" with auth method "token"',
+      message: 'Connection not found for type "nexus" with auth method "token"',
     });
 
     // Without auth methods, only the connection info is returned
     await expect(
       nexus.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://nexus.example.com' },
       }),
     ).resolves.not.toHaveProperty('auth');
@@ -106,7 +105,7 @@ describe('DefaultNexusConnectionsService', () => {
     // Connections scoped to other plugins are hidden
     await expect(
       catalog.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://internal.example.com' },
         authMethods: ['none'],
       }),
@@ -116,14 +115,14 @@ describe('DefaultNexusConnectionsService', () => {
     });
     await expect(
       nexus.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'https://internal.example.com' },
         authMethods: ['none'],
       }),
     ).rejects.toMatchObject({ name: 'NotFoundError' });
     await expect(
       nexus.find({
-        type: 'nexus-repository-manager',
+        type: 'nexus',
         query: { url: 'not a url' },
         authMethods: ['none'],
       }),
@@ -145,28 +144,28 @@ describe('DefaultNexusConnectionsService', () => {
         .forPlugin('nexus-repository-manager')
         .getDefaultQuery(),
     ).toBeUndefined();
-    expect(() => create({ type: 'nexus-repository-manager' })).toThrow(
+    expect(() => create({ type: 'nexus' })).toThrow(
       'Expected "connections" config to be an array of connection objects',
     );
-    expect(() =>
-      create([{ type: 'nexus-repository-manager', host: 'a.com', auth: [] }]),
-    ).toThrow('must configure at least one auth method');
+    expect(() => create([{ type: 'nexus', host: 'a.com', auth: [] }])).toThrow(
+      'must configure at least one auth method',
+    );
     expect(() =>
       create([
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: 'a.com',
           unknown: true,
           auth: [{ method: 'none' }],
         },
       ]),
     ).toThrow(
-      /Invalid connection of type "nexus-repository-manager" in connections config:\n.*unknown/,
+      /Invalid connection of type "nexus" in connections config:\n.*unknown/,
     );
     expect(() =>
       create([
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: 'a.com',
           auth: [{ method: 'oauth' }],
         },
@@ -175,7 +174,7 @@ describe('DefaultNexusConnectionsService', () => {
     expect(() =>
       create([
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: 'a.com',
           auth: [{ method: 'token' }],
         },
@@ -184,19 +183,17 @@ describe('DefaultNexusConnectionsService', () => {
     expect(() =>
       create([
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: 'a.com',
           auth: [{ method: 'none' }],
         },
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: 'a.com',
           auth: [{ method: 'none' }],
         },
       ]),
-    ).toThrow(
-      'Duplicate connection of type "nexus-repository-manager" for host "a.com"',
-    );
+    ).toThrow('Duplicate connection of type "nexus" for host "a.com"');
   });
 
   it('exposes JSON schemas like the built-in connection types', () => {

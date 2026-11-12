@@ -255,7 +255,7 @@ export class NexusRepositoryManagerService {
     }
 
     return this.connections.find({
-      type: 'nexus-repository-manager',
+      type: 'nexus',
       query,
       authMethods: ['token', 'basic', 'none'],
     });

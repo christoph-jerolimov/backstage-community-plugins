@@ -52,7 +52,7 @@ function createPortableSchema<TSchema extends z.ZodType>(
   };
 }
 
-const TYPE = 'nexus-repository-manager';
+const TYPE = 'nexus';
 
 /**
  * The connection type for Nexus Repository Manager instances.
@@ -67,7 +67,7 @@ const TYPE = 'nexus-repository-manager';
  * @public
  */
 export const nexusConnectionType: ConnectionTypeDefinition<{
-  type: 'nexus-repository-manager';
+  type: 'nexus';
   cardinality: 'multiton';
   lookupStrategy: 'host';
   query: { url: string };

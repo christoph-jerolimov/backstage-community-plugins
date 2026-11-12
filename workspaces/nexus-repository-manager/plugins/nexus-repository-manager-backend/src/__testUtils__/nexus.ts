@@ -28,7 +28,7 @@ export const testConfig = {
       auth: [{ method: 'token', token: 'github-token' }],
     },
     {
-      type: 'nexus-repository-manager',
+      type: 'nexus',
       title: 'Main Nexus',
       host: 'nexus.example.com',
       auth: [
@@ -43,7 +43,7 @@ export const testConfig = {
       ],
     },
     {
-      type: 'nexus-repository-manager',
+      type: 'nexus',
       host: 'other-nexus.example.com:8443',
       auth: [{ method: 'basic', username: 'user', password: 'pass' }],
     },

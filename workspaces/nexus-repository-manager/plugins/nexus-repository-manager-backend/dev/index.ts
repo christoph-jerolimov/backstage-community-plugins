@@ -38,7 +38,7 @@ backend.add(
       },
       connections: [
         {
-          type: 'nexus-repository-manager',
+          type: 'nexus',
           host: process.env.NEXUS_HOST ?? 'localhost:8081',
           ...(process.env.NEXUS_HOST
             ? {}
