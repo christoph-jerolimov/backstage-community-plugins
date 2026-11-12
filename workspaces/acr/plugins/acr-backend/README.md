@@ -37,39 +37,45 @@ backend.add(import('@backstage-community/plugin-acr-backend'));
 ## Configuration
 
 Registries and their credentials are configured as connections of type
-`azure-container-registry`. Each entry uses the same format as the root
-`connections` configuration of the
+`azure-container-registry` in the root `connections` configuration of the
 [Backstage connections service](https://backstage.io/docs/next/backend-system/core-services/connections/configuring-connections)
-(BEP-14): a `type`, the connection fields, an optional `title` and `match`, and
-an `auth` array with one or more auth entries.
+(BEP-14). Each entry has a `type`, the connection fields, an optional `title`
+and `match`, and an `auth` array with one or more auth entries:
 
 ```yaml
-acr:
-  connections:
-    - type: azure-container-registry
-      host: myregistry.azurecr.io
-      auth:
-        - method: basic
-          username: ${ACR_USERNAME}
-          password: ${ACR_PASSWORD}
-    - type: azure-container-registry
-      title: Other registry
-      host: otherregistry.azurecr.io
-      # Optional, defaults to https://<host>/acr/v1
-      # apiBaseUrl: https://otherregistry.azurecr.io/acr/v1
-      auth:
-        - method: token
-          token: ${ACR_TOKEN}
+connections:
+  - type: azure-container-registry
+    host: myregistry.azurecr.io
+    auth:
+      - method: basic
+        username: ${ACR_USERNAME}
+        password: ${ACR_PASSWORD}
+  - type: azure-container-registry
+    title: Other registry
+    host: otherregistry.azurecr.io
+    # Optional, defaults to https://<host>/acr/v1
+    # apiBaseUrl: https://otherregistry.azurecr.io/acr/v1
+    auth:
+      - method: token
+        token: ${ACR_TOKEN}
+  # Connections of other types are left to the core connections service
+  - type: github
+    host: github.com
+    auth:
+      - method: token
+        token: ${GITHUB_TOKEN}
 ```
 
-> **Why `acr.connections` and not the root `connections`?** The connections
-> service only accepts built-in connection types, and plugins can't add their
-> own yet (see
-> [Create or modify a connection type](https://backstage.io/docs/next/backend-system/core-services/connections/creating-a-connection-type)).
-> Unknown types in the root `connections` array fail backend startup as soon
-> as any plugin uses the connections service. Once an
-> `azure-container-registry` type is built in, the entries can be moved to the
-> root `connections` array without changes.
+> **Note:** `azure-container-registry` is not yet one of the
+> [built-in connection types](https://backstage.io/docs/next/backend-system/core-services/connections/built-in-connection-types),
+> and plugins can't register their own. This plugin therefore reads its
+> entries from the root `connections` array itself, with the same validation
+> rules as the connections service. The core connections service in
+> `@backstage/backend-defaults` validates the whole array when the first
+> plugin or module uses it, and rejects unknown types. If any other plugin or
+> module in your backend uses the connections service, it fails with
+> `Unrecognised connection type azure-container-registry` until the type is
+> built in.
 
 Connection fields:
 

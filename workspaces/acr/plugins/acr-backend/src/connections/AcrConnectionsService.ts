@@ -34,13 +34,11 @@ import {
 } from './acrConnectionType';
 
 /**
- * The configuration key that holds the Azure Container Registry connections.
- *
- * The entries use the same format as the root `connections` configuration of
- * the Backstage connections service. They can't be placed there yet, because
- * the core service rejects connection types that aren't built in.
+ * The root configuration key of the Backstage connections service. This
+ * plugin reads the entries of type `azure-container-registry` from it and
+ * leaves all other types to the core connections service.
  */
-export const ACR_CONNECTIONS_CONFIG_KEY = 'acr.connections';
+export const CONNECTIONS_CONFIG_KEY = 'connections';
 
 type AcrConfiguredConnection =
   ConfiguredConnection<AcrConnectionTypeDefinition>;
@@ -91,11 +89,6 @@ function validateMatch(match: unknown) {
 function validateConnection(
   connection: Record<string, unknown>,
 ): AcrConnectionsConfigEntry {
-  if (connection.type !== ACR_CONNECTION_TYPE) {
-    throw new InputError(
-      `Unrecognised connection type ${connection.type}, expected "${ACR_CONNECTION_TYPE}"`,
-    );
-  }
   const rawAuth = connection.auth;
   if (!Array.isArray(rawAuth) || rawAuth.length === 0) {
     throw new InputError(
@@ -143,28 +136,31 @@ function validateConnection(
 type AcrConnectionsConfigEntry = AcrConfiguredConnection;
 
 /**
- * Reads and validates the Azure Container Registry connections from config,
- * with the same rules as `buildConnectionsFromConfig` from
- * `@backstage/connections/config`.
+ * Reads and validates the `azure-container-registry` entries of the root
+ * `connections` config, with the same rules as `buildConnectionsFromConfig`
+ * from `@backstage/connections/config`. Entries of other types are ignored.
  */
 export function buildAcrConnectionsFromConfig(
   config: RootConfigService,
 ): AcrConfiguredConnection[] {
-  const raw = config.getOptional(ACR_CONNECTIONS_CONFIG_KEY);
+  const raw = config.getOptional(CONNECTIONS_CONFIG_KEY);
   if (raw === undefined) {
     return [];
   }
   if (!Array.isArray(raw)) {
     throw new InputError(
-      `Expected "${ACR_CONNECTIONS_CONFIG_KEY}" config to be an array of connection objects`,
+      `Expected "${CONNECTIONS_CONFIG_KEY}" config to be an array of connection objects`,
     );
   }
 
-  const connections = raw.map(entry => {
+  const isAcrEntry = (entry: unknown) =>
+    typeof entry === 'object' &&
+    entry !== null &&
+    !Array.isArray(entry) &&
+    (entry as { type?: unknown }).type === ACR_CONNECTION_TYPE;
+
+  const connections = raw.filter(isAcrEntry).map(entry => {
     try {
-      if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
-        throw new InputError('Expected connection to be an object');
-      }
       return validateConnection(entry as Record<string, unknown>);
     } catch (e) {
       const type =
@@ -172,7 +168,7 @@ export function buildAcrConnectionsFromConfig(
           ? (entry as { type: string }).type
           : 'unknown';
       throw new InputError(
-        `Invalid connection of type "${type}" in ${ACR_CONNECTIONS_CONFIG_KEY} config:\n${describeError(
+        `Invalid connection of type "${type}" in ${CONNECTIONS_CONFIG_KEY} config:\n${describeError(
           e,
         )}`,
       );

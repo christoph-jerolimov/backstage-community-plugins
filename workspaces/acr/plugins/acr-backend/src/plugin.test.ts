@@ -79,22 +79,18 @@ describe('acrPlugin', () => {
         acrPlugin,
         mockServices.rootConfig.factory({
           data: {
-            acr: {
-              connections: [
-                {
-                  type: 'azure-container-registry',
-                  host: 'one.azurecr.io',
-                  auth: [{ method: 'token', token: 'secret-token' }],
-                },
-                {
-                  type: 'azure-container-registry',
-                  host: 'two.azurecr.io',
-                  auth: [
-                    { method: 'basic', username: 'user', password: 'pass' },
-                  ],
-                },
-              ],
-            },
+            connections: [
+              {
+                type: 'azure-container-registry',
+                host: 'one.azurecr.io',
+                auth: [{ method: 'token', token: 'secret-token' }],
+              },
+              {
+                type: 'azure-container-registry',
+                host: 'two.azurecr.io',
+                auth: [{ method: 'basic', username: 'user', password: 'pass' }],
+              },
+            ],
           },
         }),
         catalogServiceMock.factory({

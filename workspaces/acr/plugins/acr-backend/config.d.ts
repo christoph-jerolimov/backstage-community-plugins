@@ -14,45 +14,33 @@
  * limitations under the License.
  */
 export interface Config {
-  acr?: {
-    /**
-     * Azure Container Registry connections, in the same format as the root
-     * `connections` configuration of the Backstage connections service. The
-     * first connection is used for entities without a
-     * `azure-container-registry/registry-name` annotation.
-     */
-    connections?: Array<{
-      type: 'azure-container-registry';
-      /** The registry host, for example `myregistry.azurecr.io`. */
-      host: string;
-      /** Defaults to `https://<host>/acr/v1`. */
-      apiBaseUrl?: string;
+  /**
+   * Connections of the Backstage connections service. This plugin reads the
+   * entries of type `azure-container-registry`; other types are handled by the
+   * core connections service. Only the fields used by this plugin are
+   * declared, so that entries of other types stay valid.
+   */
+  connections?: Array<{
+    /** The connection type, `azure-container-registry` for this plugin. */
+    type: string;
+    /** The registry host, for example `myregistry.azurecr.io`. */
+    host?: string;
+    /** Defaults to `https://<host>/acr/v1`. */
+    apiBaseUrl?: string;
+    title?: string;
+    match?: {
+      plugins: string[];
+    };
+    auth: Array<{
+      /** `none`, `token` or `basic` for `azure-container-registry` connections. */
+      method: string;
       title?: string;
-      match?: {
-        plugins: string[];
-      };
-      auth: Array<
-        | {
-            method: 'none';
-            title?: string;
-            match?: { plugins: string[] };
-          }
-        | {
-            method: 'token';
-            /** @visibility secret */
-            token: string;
-            title?: string;
-            match?: { plugins: string[] };
-          }
-        | {
-            method: 'basic';
-            username: string;
-            /** @visibility secret */
-            password: string;
-            title?: string;
-            match?: { plugins: string[] };
-          }
-      >;
+      match?: { plugins: string[] };
+      /** @visibility secret */
+      token?: string;
+      username?: string;
+      /** @visibility secret */
+      password?: string;
     }>;
-  };
+  }>;
 }

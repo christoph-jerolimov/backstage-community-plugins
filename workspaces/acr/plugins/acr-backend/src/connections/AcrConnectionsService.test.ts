@@ -20,7 +20,7 @@ import { DefaultAcrConnectionsService } from './AcrConnectionsService';
 function create(connections: JsonValue | undefined) {
   return DefaultAcrConnectionsService.create({
     config: mockServices.rootConfig({
-      data: connections === undefined ? {} : { acr: { connections } },
+      data: connections === undefined ? {} : { connections },
     }),
     logger: mockServices.logger.mock(),
   });
@@ -29,6 +29,12 @@ function create(connections: JsonValue | undefined) {
 describe('DefaultAcrConnectionsService', () => {
   it('finds connections in the connections config format', async () => {
     const service = create([
+      // Other connection types are left to the core connections service
+      {
+        type: 'github',
+        host: 'github.com',
+        auth: [{ method: 'token', token: 'github-token' }],
+      },
       {
         type: 'azure-container-registry',
         host: 'one.azurecr.io',
@@ -149,12 +155,7 @@ describe('DefaultAcrConnectionsService', () => {
 
   it('rejects invalid config', () => {
     expect(() => create({ type: 'azure-container-registry' })).toThrow(
-      'Expected "acr.connections" config to be an array',
-    );
-    expect(() =>
-      create([{ type: 'github', host: 'x', auth: [{ method: 'none' }] }]),
-    ).toThrow(
-      'Invalid connection of type "github" in acr.connections config:\nUnrecognised connection type github',
+      'Expected "connections" config to be an array',
     );
     expect(() =>
       create([{ type: 'azure-container-registry', host: 'x', auth: [] }]),
@@ -179,7 +180,7 @@ describe('DefaultAcrConnectionsService', () => {
         },
       ]),
     ).toThrow(
-      'Invalid connection of type "azure-container-registry" in acr.connections config:\n✖ Invalid input: expected string, received undefined\n  → at token',
+      'Invalid connection of type "azure-container-registry" in connections config:\n✖ Invalid input: expected string, received undefined\n  → at token',
     );
     expect(() =>
       create([
